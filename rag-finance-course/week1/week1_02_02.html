@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - 서강대학교 K-MOOC</title>
+    <!-- hashtags: {{HASHTAGS}} -->
+    <meta name="description" content="{{DESCRIPTION}}">
+    <meta name="keywords" content="RAG, 검색증강생성, 금융AI, 마이크로러닝, 서강대학교, K-MOOC, 김종락">
+    <meta name="author" content="김종락 교수, 서강대학교 수학과">
+    <meta property="og:title" content="{{TITLE}} - 서강대학교 K-MOOC">
+    <meta property="og:description" content="{{DESCRIPTION}}">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="{{CANONICAL_URL}}">
+    
+    <!-- 접근성 개선 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- 중요 이미지 프리로드 -->
+    <link rel="preload" href="../common/images/sky.png" as="image">
+    <link rel="preload" href="../common/images/trend.png" as="image">
+    <link rel="preload" href="../common/images/checklist.png" as="image">
+    <link rel="preload" href="../common/images/roadmap.png" as="image">
+    <!-- 추가 이미지 프리로드는 여기에 -->
+    
+    <!-- 공통 CSS 로드 -->
+    <link rel="stylesheet" href="../common/css/slide-template.css">
+</head>
+<body>
+
+    <!-- 공통 UI 요소들 (프로그레스 바, 네비게이션 힌트, 로딩 인디케이터) -->
+    <div class="top-progress" id="topProgress"></div>
+    <div class="nav-hint" id="navHint">방향키로 이동 | 페이지 번호 클릭 | 스페이스바로 다음</div>
+    <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <div style="text-align: center; color: var(--muted); font-size: 0.9em;">콘텐츠 로딩 중...</div>
+    </div>
+
+    <!-- 슬라이드 1: 타이틀 & 학습목표 -->
+    <div class="slide hero" role="article" aria-label="슬라이드 1: 강의 소개 및 학습 목표">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <figure class="img-slot hero-bg">
+            <img src="../common/images/sky.png" alt="타이틀 배경" class="bg-hero" loading="lazy">
+            <figcaption></figcaption>
+        </figure>
+        <div class="slide-content" style="text-align: center; margin-top: -80px; padding-top: 0;">
+            <h1 style="margin-bottom: 24px;">{{MAIN_TITLE}}</h1>
+            <h2 style="margin: 16px 0 24px;">{{SUBTITLE}}</h2>
+            <p class="tagline" style="font-size: 1.2em; margin: 0 auto 32px; max-width: 600px; color: var(--muted);">{{TAGLINE}}</p>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <ul class="objectives" style="text-align: left; background: rgba(255, 255, 255, 0.95); padding: 24px 32px; border-radius: 12px; box-shadow: var(--shadow-md); margin: 24px auto;">
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>목표1:</strong> {{OBJECTIVE_1}}</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>목표2:</strong> {{OBJECTIVE_2}}</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>목표3:</strong> {{OBJECTIVE_3}}</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>목표4:</strong> {{OBJECTIVE_4}}</li>
+                </ul>
+            </div>
+            
+            <div class="chips" style="margin-top: 24px;">
+                {{CHIP_TAGS}}
+            </div>
+        </div>
+        <div class="page-number">1 / {{TOTAL_SLIDES}}</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 2: 내용 슬라이드 템플릿 -->
+    <div class="slide" role="article" aria-label="슬라이드 2: {{SLIDE2_TITLE}}">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>{{SLIDE2_TITLE}}</h2>
+            
+            <!-- 내용을 여기에 추가하세요 -->
+            <p>{{SLIDE2_CONTENT}}</p>
+            
+        </div>
+        <div class="page-number">2 / {{TOTAL_SLIDES}}</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 3: 내용 슬라이드 템플릿 -->
+    <div class="slide" role="article" aria-label="슬라이드 3: {{SLIDE3_TITLE}}">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>{{SLIDE3_TITLE}}</h2>
+            
+            <!-- 내용을 여기에 추가하세요 -->
+            <p>{{SLIDE3_CONTENT}}</p>
+            
+        </div>
+        <div class="page-number">3 / {{TOTAL_SLIDES}}</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 마지막 슬라이드: 학습 정리 템플릿 -->
+    <div class="slide" role="article" aria-label="슬라이드 {{TOTAL_SLIDES}}: 학습 내용 정리">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col image">
+                <figure class="img-slot" style="--img-w: 85%; --img-max-h: 60vh;">
+                    <img src="../common/images/checklist.png" alt="체크리스트 이미지" style="opacity: 0.95;" loading="lazy">
+                    <figcaption>학습 성과 체크포인트</figcaption>
+                </figure>
+            </div>
+            <div class="col text">
+                <h2>학습 정리 및 핵심 체크</h2>
+                
+                <div class="quiz">
+                    <h3>핵심 개념 체크리스트</h3>
+                    <div class="objectives" style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> {{CHECK_1}}</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> {{CHECK_2}}</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> {{CHECK_3}}</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> {{CHECK_4}}</li>
+                    </div>
+                </div>
+                
+                <div class="warning" style="background: var(--pastel-yellow); border-color: #f6e58d;">
+                    <h3>학습 점검 질문</h3>
+                    <p>{{REVIEW_QUESTIONS}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">{{TOTAL_SLIDES}} / {{TOTAL_SLIDES}}</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 공통 JavaScript 로드 -->
+    <script src="../common/js/slide-navigation.js"></script>
+
+</body>
+</html>

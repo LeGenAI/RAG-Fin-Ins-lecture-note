@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG의 개요 및 적용 사례 - 1주차 1차시 | 서강대학교 K-MOOC</title>
+    <!-- hashtags: #RAG #검색증강생성 #금융AI #보험데이터 #마이크로러닝 #KMOOC -->
+    <meta name="description" content="RAG(검색 증강 생성) 기술의 핵심 원리와 금융 분야 적용 사례를 15분 마이크로러닝으로 학습합니다. 김종락 교수가 진행하는 서강대학교 K-MOOC 강의입니다.">
+    <meta name="keywords" content="RAG, 검색증강생성, 금융AI, 마이크로러닝, 서강대학교, K-MOOC, 김종락">
+    <meta name="author" content="김종락 교수, 서강대학교 수학과">
+    <meta property="og:title" content="RAG의 개요 및 적용 사례 - 서강대학교 K-MOOC">
+    <meta property="og:description" content="15분 마이크로러닝으로 배우는 RAG 기술과 금융 분야 실무 적용">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://k-mooc.sogang.ac.kr/courses/rag-finance/week1/01/">
+    
+    <!-- 접근성 개선 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- 중요 이미지 프리로드 -->
+    <link rel="preload" href="../common/images/sky.png" as="image">
+    <link rel="preload" href="../common/images/trend.png" as="image">
+    <link rel="preload" href="../common/images/checklist.png" as="image">
+    <link rel="preload" href="../common/images/roadmap.png" as="image">
+    <link rel="preload" href="images/ai_hallucination_concept.png" as="image">
+    <link rel="preload" href="images/knowledge_cutoff_timeline.png" as="image">
+    <link rel="preload" href="images/rag_detailed_architecture.png" as="image">
+    <link rel="preload" href="images/financial_ai_system_integration.png" as="image">
+    
+    <!-- 공통 CSS 로드 -->
+    <link rel="stylesheet" href="../common/css/slide-template.css">
+</head>
+<body>
+
+    <!-- 공통 UI 요소들 (프로그레스 바, 네비게이션 힌트, 로딩 인디케이터) -->
+    <!-- 실제 사용시: common/template-ui-elements.html 내용을 여기에 포함 -->
+    <div class="top-progress" id="topProgress"></div>
+    <div class="nav-hint" id="navHint">방향키로 이동 | 페이지 번호 클릭 | 스페이스바로 다음</div>
+    <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+        <div style="text-align: center; color: var(--muted); font-size: 0.9em;">콘텐츠 로딩 중...</div>
+    </div>
+
+    <!-- 슬라이드 1: 타이틀 & 학습목표 -->
+    <div class="slide hero" role="article" aria-label="슬라이드 1: RAG 강의 소개 및 학습 목표">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <figure class="img-slot hero-bg">
+            <img src="../common/images/sky.png" alt="타이틀 배경" class="bg-hero" loading="lazy">
+            <figcaption></figcaption>
+        </figure>
+        <div class="slide-content" style="text-align: center; margin-top: -80px; padding-top: 0;">
+            <h1 style="margin-bottom: 24px;">RAG를 이용한 나만의 AI 금융 비서, 보험 설계사 만들기</h1>
+            <h2 style="margin: 16px 0 24px;">RAG의 개요 및 적용 사례 - 1주차 1차시</h2>
+            <p class="tagline" style="font-size: 1.2em; margin: 0 auto 32px; max-width: 600px; color: var(--muted);">Knowledge Retrieval + AI Generation = Trustworthy Intelligence</p>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <ul class="objectives" style="text-align: left; background: rgba(255, 255, 255, 0.95); padding: 24px 32px; border-radius: 12px; box-shadow: var(--shadow-md); margin: 24px auto;">
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>이해:</strong> RAG의 핵심 원리와 전통적 LLM과의 차이점 분석</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>적용:</strong> 금융 분야 5가지 주요 적용 영역과 실무 시나리오 학습</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>구현:</strong> RAG 시스템 아키텍처와 핵심 구성 요소 파악</li>
+                    <li style="margin: 8px 0; font-size: 1.1em;"><strong>평가:</strong> 글로벌 RAG 시장 동향과 성과 지표 분석</li>
+                </ul>
+            </div>
+            
+            <div class="chips" style="margin-top: 24px;">
+                <span class="chip">#RAG</span><span class="chip">#금융AI</span><span class="chip">#검색증강생성</span><span class="chip">#마이크로러닝</span>
+            </div>
+        </div>
+        <div class="page-number">1 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 2: AI의 첫 번째 한계 - 환각 -->
+    <div class="slide" role="article" aria-label="슬라이드 2: AI 환각 현상의 문제점">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col image">
+                <figure class="img-slot" style="--img-w: 100%; --img-max-h: 75vh;">
+                    <img src="images/ai_hallucination_concept.png" 
+                         alt="AI 환각 현상 설명 다이어그램 - 사실 기반 답변과 환각 현상의 대비" 
+                         loading="lazy">
+                    <figcaption>AI가 사실이 아닌 내용을 그럴듯하게 생성하는 환각 현상</figcaption>
+                </figure>
+            </div>
+            <div class="col text">
+            <h2>문제점 1: AI의 환각(Hallucination) 현상</h2>
+            <div class="warning">
+                <h3>실제 대화 예시</h3>
+                <p><strong>사용자:</strong> "우리 은행의 2024년 신규 대출 상품 금리가 어떻게 되나요?"</p>
+                <p><strong>AI:</strong> "○○은행의 2024년 신규 주택담보대출 금리는 연 3.2%입니다." (부정확한 정보)</p>
+            </div>
+            <div class="analogy">
+                    <p><strong>비유:</strong> 정확한 근거 없이 그럴듯한 답변을 만들어내는 시스템</p>
+                </div>
+                <p>AI는 사실을 말하는 게 아니라 <span class="highlight">통계적으로 그럴듯한 단어</span>를 예측해 조합합니다. RAG는 근거 자료를 먼저 찾아 환각을 줄입니다.</p>
+            </div>
+        </div>
+        <div class="page-number">2 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 3: 전통적 LLM vs RAG 비교 분석 -->
+    <div class="slide" role="article" aria-label="슬라이드 3: 전통적 LLM과 RAG 시스템 비교">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col text">
+                <h2>전통적 LLM vs RAG: 패러다임 전환</h2>
+                
+                <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th class="vs-llm">전통적 LLM</th>
+                        <th class="vs-rag">RAG 시스템</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>데이터 업데이트</strong></td>
+                        <td class="vs-llm">재학습 필요 (고비용, 수개월)</td>
+                        <td class="vs-rag">즉시 업데이트 가능 (실시간)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>정보 출처</strong></td>
+                        <td class="vs-llm">내부 파라미터만 활용</td>
+                        <td class="vs-rag">외부 DB + LLM 조합</td>
+                    </tr>
+                    <tr>
+                        <td><strong>설명 가능성</strong></td>
+                        <td class="vs-llm">낮음 (블랙박스)</td>
+                        <td class="vs-rag">높음 (출처 문서 제공)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>정확성</strong></td>
+                        <td class="vs-llm">할루시네이션 위험 40%</td>
+                        <td class="vs-rag">검색 기반 정확성 25% 향상</td>
+                    </tr>
+                    <tr>
+                        <td><strong>보안성</strong></td>
+                        <td class="vs-llm">학습 데이터 노출 위험</td>
+                        <td class="vs-rag">Private DB 활용 가능</td>
+                    </tr>
+                    <tr>
+                        <td><strong>비용 효율성</strong></td>
+                        <td class="vs-llm">재학습 시 수억원 비용</td>
+                        <td class="vs-rag">지식 업데이트 저비용</td>
+                    </tr>
+                </tbody>
+            </table>
+                
+                <div class="analogy">
+                    <p><strong>쉬운 비유:</strong> 전통적 LLM은 <span class="highlight">암기형 학습자</span>, RAG는 <span class="highlight">자료 조사형 연구자</span></p>
+                </div>
+            </div>
+            <div class="col image">
+                <figure class="img-slot" style="--img-w: 100%; --img-max-h: 75vh; margin-bottom: 24px;">
+                    <img src="images/knowledge_cutoff_timeline.png" 
+                         alt="지식 마감일 문제 설명 다이어그램 - LLM의 지식 한계와 실시간 정보 부족" 
+                         loading="lazy">
+                    <figcaption>LLM의 지식 마감일 한계와 RAG의 실시간 업데이트 장점</figcaption>
+                </figure>
+                
+                <div class="stat-highlight">
+                    <h4>성과 비교</h4>
+                    <p>RAG 도입 시 할루시네이션 40% 감소 · 정확도 25% 향상 · 비용 70% 절감</p>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">3 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 4: RAG 시스템 아키텍처 -->
+    <div class="slide" role="article" aria-label="슬라이드 4: RAG 시스템 구조와 핵심 구성요소">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>RAG 시스템 아키텍처 및 핵심 구성 요소</h2>
+            
+            <div class="split">
+                <div class="col image">
+                    <figure class="img-slot" style="--img-w: 100%; --img-max-h: 60vh;">
+                        <img src="images/rag_detailed_architecture.png" 
+                             alt="RAG 시스템 아키텍처 다이어그램 - 5단계 플로우와 지원 인프라 구조" 
+                             loading="lazy">
+                        <figcaption>RAG 시스템의 완전한 아키텍처와 데이터 플로우</figcaption>
+                    </figure>
+                </div>
+                <div class="col text">
+                    <div class="step-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="step">
+                            <h4>Retrieval (검색)</h4>
+                            <p>벡터 유사도 기반 검색<br>다양한 데이터 소스 통합</p>
+                        </div>
+                        <div class="step">
+                            <h4>Generation (생성)</h4>
+                            <p>GPT-4, Claude, LLaMA 활용<br>컨텍스트 증강 답변 생성</p>
+                        </div>
+                        <div class="step">
+                            <h4>Knowledge Base</h4>
+                            <p>금융 데이터 통합 관리<br>실시간 업데이트 지원</p>
+                        </div>
+                        <div class="step">
+                            <h4>Vector Store</h4>
+                            <p>텍스트 → 고차원 벡터<br>Chroma, Pinecone, FAISS</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="prompt-card">
+                <h3>실무 적용 예시: 개인연금 상담</h3>
+                <p><strong>질문:</strong> "개인연금 상품의 세제혜택은 무엇인가요?"</p>
+                <div class="architecture-flow" style="font-size: 0.9em; margin: 12px 0;">
+                    <div class="flow-step">질문 벡터화</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">유사 문서 3-5개 검색</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">컨텍스트 구성</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">답변 생성 + 출처 표시</div>
+                </div>
+                <p><strong>결과:</strong> "개인연금 상품의 주요 세제혜택은... 1) 소득공제 연간 최대 400만원 2) 운용수익 비과세 3) 연금수령 시 3.3% 저율 과세<br><em>출처: 국세청 개인연금 가이드 (2024.08.01)</em>"</p>
+            </div>
+        </div>
+        <div class="page-number">4 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 5: 글로벌 RAG 시장 현황 및 트렌드 -->
+    <div class="slide" role="article" aria-label="슬라이드 5: 글로벌 RAG 시장 동향과 성장 전망">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>글로벌 RAG 시장 현황 및 도입 추세</h2>
+                    
+            <div class="stat-highlight">
+                <h4>글로벌 RAG 시장 규모</h4>
+                <p>2024년 12억 달러 → 2029년 47억 달러 (연평균 31% 성장)</p>
+            </div>
+            
+            <div class="kpi-grid">
+                <div class="kpi">
+                    <h4>금융 분야 적용률</h4>
+                    <p>45% (2024년 기준)<br>가장 높은 도입률</p>
+                </div>
+                <div class="kpi">
+                    <h4>국내 메가뱅크</h4>
+                    <p>5개 은행 모두 도입<br>연간 1,500억원 투자</p>
+                </div>
+                <div class="kpi">
+                    <h4>성능 향상</h4>
+                    <p>할루시네이션 40% 감소<br>정확도 25% 향상</p>
+                </div>
+                <div class="kpi">
+                    <h4>고객 만족도</h4>
+                    <p>기존 챗봇 대비<br>37% 만족도 증가</p>
+                </div>
+            </div>
+            
+            <!-- 2단 구성: 이미지 + 프롬프트 카드 (3:7 비율) -->
+            <div class="split asymmetric" style="margin: 32px 0;">
+                <div class="col image">
+                    <figure class="img-slot banner" style="--img-ar: 4/3; --img-w: 85%; --img-max-h: 50vh;">
+                        <img src="../common/images/trend.png" 
+                             alt="RAG 시장 성장 트렌드 차트 - 2024-2029 글로벌 시장 전망" 
+                             loading="lazy">
+                        <figcaption>글로벌 RAG 시장 성장률 및 금융 분야 도입 현황</figcaption>
+                    </figure>
+                </div>
+                <div class="col text">
+                    <div class="prompt-card" style="max-width: 100%; margin: 0; padding: 32px; border-radius: 16px; box-shadow: var(--shadow-md);">
+                        <h3 style="color: var(--accent); margin-bottom: 20px; font-size: 1.3em;">왜 지금 RAG가 주목받는가?</h3>
+                        <div class="step-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="step" style="margin: 0; padding: 16px;">
+                                <h4>실시간성</h4>
+                                <p>최신 금리, 환율, 규제 정보 즉시 반영</p>
+                            </div>
+                            <div class="step" style="margin: 0; padding: 16px;">
+                                <h4>신뢰성</h4>
+                                <p>출처 명시로 금융업계 요구 충족</p>
+                            </div>
+                            <div class="step" style="margin: 0; padding: 16px;">
+                                <h4>경제성</h4>
+                                <p>LLM 재학습 없이 지식 업데이트</p>
+                            </div>
+                            <div class="step" style="margin: 0; padding: 16px;">
+                                <h4>보안성</h4>
+                                <p>내부 데이터 보호하며 AI 활용</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="analogy">
+                <p><strong>실무 관점:</strong> RAG는 <span class="highlight">전문가가 완벽한 검색 도구를 가진 것</span>과 같습니다.</p>
+            </div>
+        </div>
+        <div class="page-number">5 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 6: RAG의 금융 분야 장점 -->
+    <div class="slide" role="article" aria-label="슬라이드 6: 금융 분야 RAG 적용 영역과 실무 사례">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>금융 분야 RAG 적용 영역 및 실무 시나리오</h2>
+            
+            <div class="kpi-grid">
+                <div class="kpi">
+                    <h4>금융 상품 추천</h4>
+                    <p><strong>활용:</strong> 고객 프로필 × 상품 DB 매칭<br>
+                    <em>예시: "30대 직장인에게 최적의 주택담보대출은?"</em></p>
+                </div>
+                <div class="kpi">
+                    <h4>보험 설계 AI</h4>
+                    <p><strong>활용:</strong> 고객 니즈 분석 및 상품 조합<br>
+                    <em>예시: "당뇨병 가족력이 있는 고객 보험 설계"</em></p>
+                </div>
+                <div class="kpi">
+                    <h4>투자 조언 챗봇</h4>
+                    <p><strong>활용:</strong> 시장 분석 리포트 및 뉴스 통합<br>
+                    <em>예시: "현재 반도체 섹터 투자 전망은?"</em></p>
+                </div>
+                <div class="kpi">
+                    <h4>리스크 분석</h4>
+                    <p><strong>활용:</strong> 신용평가 및 이상 거래 탐지<br>
+                    <em>예시: "이 거래 패턴의 위험도는?"</em></p>
+                </div>
+                <div class="kpi">
+                    <h4>고객 상담 자동화</h4>
+                    <p><strong>활용:</strong> 24/7 개인화 맞춤 상담<br>
+                    <em>예시: "내 적금 해지 시 수수료는?"</em></p>
+                </div>
+            </div>
+            
+            <div class="prompt-card">
+                <h3>실무 적용 시나리오: 스마트 뱅킹 어시스턴트</h3>
+                <div class="persona">
+                    <h4>고객 프로필: 김철수 (35세, 연소득 5,000만원, 신혼부부)</h4>
+                    <p><strong>질문:</strong> "첫 주택 구매를 위한 최적의 대출 상품과 금리를 알려주세요."</p>
+                </div>
+                <div class="flow">
+                    <div class="node">고객 정보 검색<br><small>나이, 소득, 신용등급</small></div>
+                    <div class="arrow">→</div>
+                    <div class="node">적용 가능 상품 필터링<br><small>디딤돌, 신혼희망타운</small></div>
+                    <div class="arrow">→</div>
+                    <div class="node">최신 금리 정보 조회<br><small>2024.08.12 기준</small></div>
+                    <div class="arrow">→</div>
+                    <div class="node">개인화 추천 생성<br><small>출처와 함께 제시</small></div>
+                </div>
+                <p><strong>답변:</strong> "김철수님께는 <span class="highlight">신혼희망타운 대출(금리 2.2%, 최대 2.5억원)</span>을 우선 추천드립니다. 디딤돌대출(금리 2.85%) 대비 0.65%p 유리하며, 신혼부부 혜택을 받으실 수 있습니다. <em>출처: 주택도시기금 (2024.08.12)</em>"</p>
+            </div>
+            
+            <div class="warning">
+                <p><strong>금융업계 특수성:</strong> 작은 오류도 큰 손실로 이어질 수 있어 <span class="highlight">출처 기반 신뢰성</span>이 핵심입니다.</p>
+            </div>
+        </div>
+        <div class="page-number">6 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 7: 학습 정리 및 핵심 체크 -->
+    <div class="slide" role="article" aria-label="슬라이드 7: 학습 내용 정리 및 체크리스트">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col image">
+                <figure class="img-slot" style="--img-w: 85%; --img-max-h: 60vh;">
+                    <img src="../common/images/checklist.png" alt="체크리스트 이미지" style="opacity: 0.95;" loading="lazy">
+                    <figcaption>학습 성과 체크포인트 및 평가 기준</figcaption>
+                </figure>
+            </div>
+            <div class="col text">
+                <h2>학습 정리 및 핵심 체크</h2>
+                
+                <div class="quiz">
+                    <h3>핵심 개념 체크리스트</h3>
+                    <div class="objectives" style="list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>개념 이해:</strong> RAG의 정의 및 Retrieval + Generation 구조 파악</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>비교 분석:</strong> 전통적 LLM vs RAG 시스템 차이점 6가지</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>구조 학습:</strong> RAG 시스템 아키텍처 및 4가지 핵심 구성 요소</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>적용 영역:</strong> 금융 분야 5가지 주요 활용 사례 및 시나리오</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>시장 동향:</strong> 글로벌 RAG 시장 규모 및 성장률 (31% CAGR)</li>
+                        <li style="margin-bottom: 8px;"><input type="checkbox" style="margin-right: 8px;"> <strong>성과 지표:</strong> 할루시네이션 40% 감소, 정확도 25% 향상</li>
+                    </div>
+                </div>
+                
+                <div class="warning" style="background: var(--pastel-yellow); border-color: #f6e58d;">
+                    <h3>학습 점검 질문</h3>
+                    <p><strong>Q1:</strong> RAG의 핵심 장점 3가지는 무엇인가요?<br>
+                    <strong>Q2:</strong> 금융업계에서 RAG가 특히 중요한 이유는?<br>
+                    <strong>Q3:</strong> 전통적 LLM과 RAG의 가장 큰 차이점은?</p>
+                </div>
+                
+                <div class="solution">
+                    <h3>즉석 복습 테스트</h3>
+                    <p>지금까지 학습한 내용을 바탕으로 <span class="highlight">"우리 회사에서 RAG를 도입해야 하는 이유 3가지"</span>를 1분 안에 설명해보세요!</p>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">7 / 7</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 공통 JavaScript 로드 -->
+    <script src="../common/js/slide-navigation.js"></script>
+
+</body>
+</html>

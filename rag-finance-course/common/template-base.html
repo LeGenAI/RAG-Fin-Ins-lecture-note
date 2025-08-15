@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - 서강대학교 K-MOOC</title>
+    
+    <!-- SEO 및 소셜 미디어 메타태그 -->
+    <meta name="description" content="{{DESCRIPTION}}">
+    <meta name="keywords" content="RAG, 검색증강생성, 금융AI, 마이크로러닝, 서강대학교, K-MOOC, 김종락">
+    <meta name="author" content="김종락 교수, 서강대학교 수학과">
+    <meta property="og:title" content="{{TITLE}} - 서강대학교 K-MOOC">
+    <meta property="og:description" content="{{DESCRIPTION}}">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="{{CANONICAL_URL}}">
+    
+    <!-- 접근성 개선 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- 중요 이미지 프리로드 -->
+    <link rel="preload" href="../common/images/sky.png" as="image">
+    <link rel="preload" href="../common/images/trend.png" as="image">
+    <link rel="preload" href="../common/images/checklist.png" as="image">
+    <link rel="preload" href="../common/images/roadmap.png" as="image">
+    {{ADDITIONAL_PRELOADS}}
+    
+    <!-- 공통 CSS 로드 -->
+    <link rel="stylesheet" href="../common/css/slide-template.css">
+    
+    <!-- 페이지별 추가 CSS (선택사항) -->
+    {{ADDITIONAL_CSS}}
+</head>
+<body>
+
+    <!-- 공통 UI 요소들 -->
+    {{UI_ELEMENTS}}
+
+    <!-- 슬라이드 컨텐츠 영역 -->
+    {{SLIDE_CONTENT}}
+
+    <!-- 공통 JavaScript 로드 -->
+    <script src="../common/js/slide-navigation.js"></script>
+    
+    <!-- 페이지별 추가 JavaScript (선택사항) -->
+    {{ADDITIONAL_JS}}
+
+</body>
+</html>

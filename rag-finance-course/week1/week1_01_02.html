@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG 프레임워크 심화 학습 - 1주차 1차시(2) | 서강대학교 K-MOOC</title>
+    <!-- hashtags: #RAG #프레임워크 #벡터검색 #LangChain #금융AI -->
+    <meta name="description" content="RAG 시스템의 핵심 프레임워크와 구현 기술을 심화 학습합니다. Indexing과 Query 처리, 벡터 검색, 하이브리드 검색 전략을 다룹니다.">
+    <meta name="keywords" content="RAG, 프레임워크, 벡터검색, LangChain, 임베딩, 금융AI, 서강대학교, K-MOOC">
+    <meta name="author" content="김종락 교수, 서강대학교 수학과">
+    
+    <!-- 중요 이미지 프리로드 -->
+    <link rel="preload" href="../common/images/sky.png" as="image">
+    <link rel="preload" href="images/RAG_architecture_visualization.png" as="image">
+    <link rel="preload" href="images/embedding.png" as="image">
+    <link rel="preload" href="images/vector_search_in_semantic_space.png" as="image">
+    <link rel="preload" href="images/morgan_stanley_case.png" as="image">
+    
+    <!-- 공통 CSS 로드 -->
+    <link rel="stylesheet" href="../common/css/slide-template.css">
+</head>
+<body>
+
+    <!-- 공통 UI 요소들 -->
+    <div class="top-progress" id="topProgress"></div>
+    <div class="nav-hint" id="navHint">방향키로 이동 | 페이지 번호 클릭 | 스페이스바로 다음</div>
+    
+    <!-- 슬라이드 1: 타이틀 & 학습목표 -->
+    <div class="slide hero" role="article" aria-label="슬라이드 1: RAG 프레임워크 심화 학습 소개">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <figure class="img-slot hero-bg">
+            <img src="../common/images/sky.png" alt="타이틀 배경" class="bg-hero" loading="lazy">
+            <figcaption></figcaption>
+        </figure>
+        <div class="slide-content" style="text-align: center; margin-top: -60px;">
+            <h1 style="margin-bottom: 24px;">RAG 프레임워크 심화 학습</h1>
+            <h2 style="margin: 16px 0 24px;">검색 증강 생성의 핵심 기술 이해 - 1주차 1차시(2)</h2>
+            <p class="tagline" style="font-size: 1.2em; margin: 0 auto 32px; max-width: 700px; color: var(--muted);">
+                From Theory to Practice: Building Production-Ready RAG Systems
+            </p>
+            
+            <div style="max-width: 900px; margin: 0 auto;">
+                <ul class="objectives" style="text-align: left; background: rgba(255, 255, 255, 0.95); padding: 28px 36px; border-radius: 12px; box-shadow: var(--shadow-md);">
+                    <li style="margin: 10px 0; font-size: 1.1em;"><strong>아키텍처 이해:</strong> RAG 시스템의 Indexing과 Query 처리 파이프라인 상세 분석</li>
+                    <li style="margin: 10px 0; font-size: 1.1em;"><strong>핵심 기술 습득:</strong> 임베딩, 벡터 검색, 하이브리드 검색의 원리와 구현</li>
+                    <li style="margin: 10px 0; font-size: 1.1em;"><strong>실무 적용:</strong> Morgan Stanley 사례를 통한 금융 분야 구현 패턴 학습</li>
+                    <li style="margin: 10px 0; font-size: 1.1em;"><strong>성능 최적화:</strong> Chunking 전략, 검색 알고리즘, 프롬프트 엔지니어링</li>
+                </ul>
+            </div>
+            
+            <div class="chips" style="margin-top: 24px;">
+                <span class="chip">#RAG프레임워크</span>
+                <span class="chip">#벡터검색</span>
+                <span class="chip">#LangChain</span>
+                <span class="chip">#임베딩</span>
+                <span class="chip">#하이브리드검색</span>
+            </div>
+        </div>
+        <div class="page-number">1 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 2: RAG 시스템 전체 아키텍처 -->
+    <div class="slide" role="article" aria-label="슬라이드 2: RAG 시스템 아키텍처 상세">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>RAG 시스템 아키텍처: 5단계 처리 파이프라인</h2>
+            
+            <div class="split">
+                <div class="col image">
+                    <figure class="img-slot" style="--img-w: 100%; --img-max-h: 60vh;">
+                        <img src="images/RAG_architecture_visualization.png" 
+                             alt="RAG 시스템 전체 아키텍처 - Indexing과 Query 처리 플로우" 
+                             loading="lazy">
+                        <figcaption>RAG 시스템의 End-to-End 처리 파이프라인</figcaption>
+                    </figure>
+                </div>
+                <div class="col text">
+                    <div class="process-card">
+                        <h3>Indexing Phase (데이터 준비 단계)</h3>
+                        <div class="architecture-flow" style="flex-direction: column; align-items: flex-start;">
+                            <div class="flow-step" style="width: 100%; margin: 8px 0;">
+                                <strong>1. 문서 불러오기:</strong> PDF, 웹페이지, 데이터베이스에서 자료 가져오기
+                            </div>
+                            <div class="flow-step" style="width: 100%; margin: 8px 0;">
+                                <strong>2. 텍스트 나누기:</strong> 긴 문서를 작은 조각으로 분할 (약 500-1000 단어)
+                            </div>
+                            <div class="flow-step" style="width: 100%; margin: 8px 0;">
+                                <strong>3. 벡터로 변환:</strong> 텍스트를 숫자(벡터)로 변환해서 컴퓨터가 이해하도록
+                            </div>
+                            <div class="flow-step" style="width: 100%; margin: 8px 0;">
+                                <strong>4. 벡터 저장:</strong> 변환된 벡터를 데이터베이스에 저장
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="warning" style="margin-top: 20px;">
+                        <h4>핵심 고려사항</h4>
+                        <p>• <strong>조각 크기:</strong> 너무 작으면 전체 내용을 못 담고, 너무 크면 정확한 검색이 어려워짐</p>
+                        <p>• <strong>겹치기 설정:</strong> 조각 사이를 약간 겹쳐서 중요한 정보가 끊어지지 않도록</p>
+                        <p>• <strong>추가 정보:</strong> 문서 출처, 작성 날짜 등을 함께 저장</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-highlight">
+                <h4>처리 성능 벤치마크</h4>
+                <p>100만 문서 인덱싱: 2시간 | 벡터 검색 속도: &lt;50ms | 임베딩 차원: 768-1536</p>
+            </div>
+        </div>
+        <div class="page-number">2 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 3: 텍스트 분할(Chunking) 상세 설명 -->
+    <div class="slide" role="article" aria-label="슬라이드 3: 텍스트 분할 전략 심화">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>텍스트 분할: 큰 문서를 작은 조각으로 나누기</h2>
+            
+            <div class="warning" style="margin-bottom: 20px;">
+                <h3>왜 문서를 나눠야 할까요?</h3>
+                <p><strong>1. 정확성:</strong> "구글이 앤스로픽에 투자한 금액은?" 같은 질문에 전체 100페이지 문서가 아닌 해당 정보만 있는 1단락만 찾아서 답변</p>
+                <p><strong>2. 비용 절감:</strong> GPT-4에 100페이지 전체를 보내면 약 $1, 필요한 2-3단락만 보내면 $0.01</p>
+                <p><strong>3. 할루시네이션 방지:</strong> 너무 많은 정보를 주면 LLM이 헷갈려서 엉뚱한 답변을 생성할 수 있음</p>
+            </div>
+            
+            <div class="split">
+                <div class="col text">
+                    <h3>Chunk Size와 Overlap 이해하기</h3>
+                    <div class="analogy">
+                        <p><strong>예시 문서:</strong><br>
+                        "서강대학교는 1960년에 설립된 대학입니다. <span style="color: var(--accent);">|</span> 
+                        수학과는 1964년에 개설되었으며, 현재 20명의 교수진이 있습니다. <span style="color: var(--accent);">|</span> 
+                        김종락 교수는 인공지능과 수학의 융합 연구를 진행하고 있습니다."</p>
+                        
+                        <p style="margin-top: 12px;"><strong>Chunk Size = 50자:</strong> 각 조각의 최대 길이<br>
+                        <strong>Chunk Overlap = 10자:</strong> 조각 간 겹치는 부분</p>
+                        
+                        <p style="margin-top: 12px; background: var(--pastel-blue); padding: 8px; border-radius: 4px;">
+                        <strong>조각 1:</strong> "서강대학교는 1960년에 설립된 대학입니다. 수학과는 1964년에"<br>
+                        <strong>조각 2:</strong> <span style="color: var(--accent);">"수학과는 1964년에"</span> "개설되었으며, 현재 20명의 교수진이"<br>
+                        <strong>조각 3:</strong> <span style="color: var(--accent);">"20명의 교수진이"</span> "있습니다. 김종락 교수는..."</p>
+                    </div>
+                    
+                    <div class="stat-highlight" style="margin-top: 20px;">
+                        <h4>실무 권장 설정</h4>
+                        <p><strong>일반 문서:</strong> chunk_size=1000, overlap=200</p>
+                        <p><strong>금융 약관:</strong> chunk_size=800, overlap=100</p>
+                        <p><strong>뉴스 기사:</strong> chunk_size=500, overlap=50</p>
+                    </div>
+                </div>
+                
+                <div class="col text">
+                    <h3>코드로 이해하는 문서 청킹</h3>
+                    <div class="prompt-card" style="font-size: 0.9em;">
+                        <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px;">
+<code>from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+# 단계 2: 문서 분할
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,      # 각 조각의 최대 크기
+    chunk_overlap=50,     # 조각 간 겹치는 부분
+    separators=[          # 우선순위별 분할 기준
+        "\n\n",          # 1순위: 단락
+        "\n",            # 2순위: 줄바꿈
+        ".",             # 3순위: 문장
+        " ",             # 4순위: 단어
+    ]
+)
+
+# 문서를 조각으로 분할
+splits = text_splitter.split_documents(docs)
+print(f"총 {len(splits)}개의 조각으로 분할됨")</code></pre>
+                    </div>
+                    
+                    <div class="case-study" style="margin-top: 15px;">
+                        <h4>Greg Kamradt의 Chunk 시각화 도구</h4>
+                        <p>• 웹사이트: <a href="https://chunkviz.up.railway.app" target="_blank" style="color: #3b82f6; text-decoration: underline;">chunkviz.up.railway.app</a></p>
+                        <p>• 자신의 문서로 최적의 chunk_size 실험 가능하며 시각적으로 확인</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">3 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 4: 임베딩(Embedding) Part 1 - 개념 이해 -->
+    <div class="slide" role="article" aria-label="슬라이드 4: 임베딩 개념 이해">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>임베딩: 텍스트를 숫자(벡터)로 변환하는 마법</h2>
+            
+            <div class="split">
+                <div class="col image">
+                    <figure class="img-slot" style="--img-w: 100%; --img-max-h: 60vh;">
+                        <img src="images/vector_search_in_semantic_space.png" 
+                             alt="벡터 공간에서 의미적으로 유사한 문서들이 가까이 모여있는 시각화" 
+                             loading="lazy">
+                        <figcaption>의미 공간에서 유사한 개념들이 가까이 위치하는 벡터 검색</figcaption>
+                    </figure>
+                </div>
+                
+                <div class="col text">
+                    <h3>임베딩이란 무엇인가?</h3>
+                    
+                    <div class="warning" style="margin-bottom: 20px;">
+                        <h4>임베딩이 왜 필요한가요?</h4>
+                        <p><strong>의미 이해:</strong> 컴퓨터는 "주택담보대출"이라는 텍스트를 이해할 수 없지만, [0.1, 0.5, 0.9, ...]같은 숫자는 계산할 수 있습니다</p>
+                        <p><strong>유사도 계산:</strong> "주택담보대출"과 "주담대"가 비슷한 의미임을 숫자의 거리로 파악할 수 있습니다</p>
+                    </div>
+                    
+                    <div class="analogy">
+                        <p><strong>쉬운 비유:</strong><br>
+                        임베딩은 단어를 <strong>지도 위의 좌표</strong>로 바꾸는 것과 같습니다.<br>
+                        • "은행"과 "금융기관" → 가까운 위치<br>
+                        • "은행"과 "의자" → 먼 위치<br>
+                        • "강가"와 "둑" → 중간 거리 (다른 의미의 은행)</p>
+                    </div>
+                    
+                    <div class="stat-highlight" style="margin-top: 20px;">
+                        <h4>임베딩 모델 비교</h4>
+                        <p><strong>OpenAI Ada-002:</strong> 1536차원, $0.0001/1K토큰</p>
+                        <p><strong>Sentence-BERT:</strong> 768차원, 무료, 한국어 지원</p>
+                        <p><strong>BGE-M3:</strong> 1024차원, 무료, 다국어 최적화</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">4 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 5: 임베딩(Embedding) Part 2 - 실제 예시 -->
+    <div class="slide" role="article" aria-label="슬라이드 5: 임베딩 실제 예시">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>임베딩 실제 예시: 유사도 계산 과정</h2>
+            
+            <div class="split">
+                <div class="col">
+                    <div class="case-study" style="margin-bottom: 20px;">
+                        <p><strong>질문:</strong> "시장조사기관 IDC가 예측한 AI 소프트웨어 시장의 연평균 성장률은?"</p>
+                        <p style="background: var(--pastel-yellow); padding: 8px; border-radius: 4px; margin: 10px 0;">
+                        질문 임베딩: [0.1, 0.5, 0.9, ..., 0.2, 0.4] (1536차원)</p>
+                    </div>
+                    
+                    <div class="kpi-grid" style="grid-template-columns: 1fr;">
+                        <div class="kpi" style="background: var(--pastel-green);">
+                            <h4>🎯 문서 1 (최고 유사도)</h4>
+                            <p>"IDC는 AI 시장이 연평균 31% 성장할 것으로 예측..."</p>
+                            <p>벡터: [0.1, 0.5, 0.9, ..., 0.1, 0.2]</p>
+                            <p style="color: var(--accent); font-weight: bold; font-size: 1.2em;">유사도: 0.85 (85%)</p>
+                        </div>
+                        <div class="kpi">
+                            <h4>문서 2</h4>
+                            <p>"국내 은행들의 디지털 전환 현황..."</p>
+                            <p>벡터: [0.7, 0.1, 0.3, ..., 0.5, 0.6]</p>
+                            <p style="color: var(--muted);">유사도: 0.30 (30%)</p>
+                        </div>
+                        <div class="kpi">
+                            <h4>문서 3</h4>
+                            <p>"블록체인 기술의 금융 적용 사례..."</p>
+                            <p>벡터: [0.9, 0.4, 0.5, ..., 0.4, 0.3]</p>
+                            <p style="color: var(--muted);">유사도: 0.25 (25%)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="solution" style="margin-top: 20px;">
+                        <p><strong>결과:</strong> 문서 1이 85% 유사도로 가장 높음 → RAG 시스템이 이 문서를 컨텍스트로 사용하여 답변 생성</p>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="prompt-card">
+                        <h3>코드로 이해하는 임베딩</h3>
+                        <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px; font-size: 0.9em;">
+<code>from langchain_openai import OpenAIEmbeddings
+import numpy as np
+
+# 임베딩 모델 초기화
+embeddings = OpenAIEmbeddings()
+
+# 텍스트를 벡터로 변환
+question = "IDC가 예측한 AI 시장 성장률"
+question_vector = embeddings.embed_query(question)
+print(f"벡터 차원: {len(question_vector)}")  # 1536
+
+# 문서들도 벡터로 변환
+doc1 = "IDC는 AI 시장이 연평균 31% 성장..."
+doc1_vector = embeddings.embed_query(doc1)
+
+doc2 = "국내 은행들의 디지털 전환 현황..."
+doc2_vector = embeddings.embed_query(doc2)
+
+# 코사인 유사도 계산
+def cosine_similarity(v1, v2):
+    return np.dot(v1, v2) / (
+        np.linalg.norm(v1) * np.linalg.norm(v2)
+    )
+
+sim1 = cosine_similarity(question_vector, doc1_vector)
+sim2 = cosine_similarity(question_vector, doc2_vector)
+
+print(f"문서1과의 유사도: {sim1:.2f}")  # 0.85
+print(f"문서2와의 유사도: {sim2:.2f}")  # 0.30
+
+# 가장 유사한 문서 선택
+if sim1 > 0.7:
+    print("✓ 관련 문서 발견!")
+    print(f"답변: {doc1}")</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">5 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 6: 벡터저장소(VectorStore) - 개념 이해 -->
+    <div class="slide" role="article" aria-label="슬라이드 6: 벡터저장소 개념 이해">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>벡터저장소: 의미 기반 검색의 핵심</h2>
+            
+            <div class="split">
+                <div class="col">
+                    <div class="warning" style="height: 100%;">
+                        <h3>벡터저장소가 왜 필요한가요?</h3>
+                        <p><strong>빠른 검색:</strong> 수백만 개의 문서 중에서 가장 유사한 Top-K개를 0.1초 안에 찾아야 합니다</p>
+                        <p><strong>의미 검색:</strong> 키워드 검색이 아닌 의미적 유사성 기반 검색이 가능합니다</p>
+                        <p><strong>확장성:</strong> 지속적으로 새로운 문서가 추가되어도 성능 저하 없이 관리 가능합니다</p>
+                        
+                        <div class="stat-highlight" style="margin-top: 20px;">
+                            <h4>성능 벤치마크</h4>
+                            <p><strong>100만 문서 기준:</strong></p>
+                            <p>• 인덱싱: 10-30분</p>
+                            <p>• 검색 속도: 10-50ms</p>
+                            <p>• 정확도: 90-95%</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <figure class="img-slot" style="--img-w: 100%; --img-max-h: 50vh;">
+                        <img src="images/embedding.png" 
+                             alt="벡터 공간에서 의미적으로 유사한 문서들이 가까이 모여있는 시각화" 
+                             loading="lazy">
+                        <figcaption>벡터 공간에서 유사한 문서들이 가까이 배치되는 모습</figcaption>
+                    </figure>
+                    
+                    <div class="prompt-card" style="margin-top: 20px;">
+                        <h3>핵심 개념</h3>
+                        <p><strong>Vector Space:</strong> 텍스트를 고차원 공간의 점으로 표현</p>
+                        <p><strong>Similarity:</strong> 벡터 간 거리로 의미적 유사도 측정</p>
+                        <p><strong>Indexing:</strong> 효율적 검색을 위한 벡터 인덱싱</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">6 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 7: 키워드 검색 vs 벡터 검색 비교 -->
+    <div class="slide" role="article" aria-label="슬라이드 7: 키워드 vs 벡터 검색 비교">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>검색 방식 비교: 키워드 vs 벡터</h2>
+            
+            <div class="case-study">
+                <h3>실제 예시: "모바일 디바이스 상에서 동작하는 인공지능 기술" 검색</h3>
+                <div class="split">
+                    <div class="col">
+                        <div style="background: var(--pastel-pink); padding: 20px; border-radius: 12px; height: 100%;">
+                            <h4>🔍 기존 키워드 검색 (SQL DB)</h4>
+                            <p><strong>검색어:</strong> "모바일", "디바이스", "인공지능"</p>
+                            <div style="margin: 15px 0;">
+                                <p><strong>문제점:</strong></p>
+                                <p>• "스마트폰 AI" → 검색 안됨 ❌</p>
+                                <p>• "온디바이스 ML" → 검색 안됨 ❌</p>
+                                <p>• "엣지 AI" → 검색 안됨 ❌</p>
+                            </div>
+                            <p style="color: var(--accent); font-weight: bold;">결과: 정확한 키워드가 없으면 못 찾음</p>
+                            
+                            <div class="prompt-card" style="margin-top: 15px; background: white;">
+                                <code style="font-size: 0.85em;">
+SELECT * FROM documents 
+WHERE content LIKE '%모바일%' 
+AND content LIKE '%디바이스%'
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col">
+                        <div style="background: var(--pastel-green); padding: 20px; border-radius: 12px; height: 100%;">
+                            <h4>🎯 벡터 검색 (Vector DB)</h4>
+                            <p><strong>임베딩 후 의미 검색</strong></p>
+                            <div style="margin: 15px 0;">
+                                <p><strong>찾은 문서들:</strong></p>
+                                <p>• "구글의 온디바이스 AI 기술" ✅</p>
+                                <p>• "애플의 Neural Engine" ✅</p>
+                                <p>• "삼성 엑시노스 NPU" ✅</p>
+                            </div>
+                            <p style="color: var(--accent); font-weight: bold;">결과: 의미가 비슷한 모든 문서 검색!</p>
+                            
+                            <div class="prompt-card" style="margin-top: 15px; background: white;">
+                                <code style="font-size: 0.85em;">
+query_embedding = embed("모바일 AI")
+similar_docs = vectorstore.similarity_search(
+    query_embedding, k=3
+)
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-highlight" style="margin-top: 24px;">
+                <h4>검색 성능 비교</h4>
+                <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="kpi">
+                        <h4>재현율</h4>
+                        <p>키워드: 45%</p>
+                        <p style="color: var(--accent); font-weight: bold;">벡터: 92%</p>
+                    </div>
+                    <div class="kpi">
+                        <h4>정확도</h4>
+                        <p>키워드: 70%</p>
+                        <p style="color: var(--accent); font-weight: bold;">벡터: 88%</p>
+                    </div>
+                    <div class="kpi">
+                        <h4>속도</h4>
+                        <p>키워드: 5ms</p>
+                        <p style="color: var(--accent); font-weight: bold;">벡터: 50ms</p>
+                    </div>
+                    <div class="kpi">
+                        <h4>다국어</h4>
+                        <p>키워드: ❌</p>
+                        <p style="color: var(--accent); font-weight: bold;">벡터: ✅</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">7 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 8: 벡터 DB 구현과 선택 가이드 -->
+    <div class="slide" role="article" aria-label="슬라이드 8: 벡터 DB 구현과 선택">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>벡터 DB 구현과 선택 가이드</h2>
+            
+            <div class="split">
+                <div class="col">
+                    <h3>코드로 이해하는 벡터저장소</h3>
+                    <div class="prompt-card" style="font-size: 0.85em;">
+                        <pre style="background: #f8f9fa; padding: 10px; border-radius: 8px;">
+<code>from langchain_community.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
+
+# 벡터저장소 생성
+embeddings = OpenAIEmbeddings()
+vectorstore = FAISS.from_documents(
+    documents=splits,
+    embedding=embeddings
+)
+
+# 유사 문서 검색
+query = "모바일 AI 기술"
+docs = vectorstore.similarity_search(query, k=3)
+
+print(f"찾은 문서: {len(docs)}개")</code></pre>
+                    </div>
+                    
+                    <div class="warning" style="margin-top: 16px;">
+                        <h4>💡 실습 팁</h4>
+                        <p>• <strong>처음 시작:</strong> ChromaDB (설치 간편)</p>
+                        <p>• <strong>프로토타입:</strong> FAISS (성능 우수)</p>
+                        <p>• <strong>프로덕션:</strong> Pinecone (관리형)</p>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <h3>주요 벡터 DB 비교</h3>
+                    <table class="comparison-table" style="font-size: 0.85em;">
+                        <thead>
+                            <tr>
+                                <th>벡터 DB</th>
+                                <th>특징</th>
+                                <th>가격</th>
+                                <th>추천</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: var(--pastel-green);">
+                                <td><strong>ChromaDB</strong></td>
+                                <td>설치 간편<br>Python 친화적</td>
+                                <td>무료</td>
+                                <td>⭐ 교육용</td>
+                            </tr>
+                            <tr>
+                                <td><strong>FAISS</strong></td>
+                                <td>Meta 개발<br>최고 성능</td>
+                                <td>무료</td>
+                                <td>프로토타입</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pinecone</strong></td>
+                                <td>완전 관리형<br>자동 확장</td>
+                                <td>$70/월~</td>
+                                <td>엔터프라이즈</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Weaviate</strong></td>
+                                <td>하이브리드<br>GraphQL</td>
+                                <td>오픈소스</td>
+                                <td>복잡한 쿼리</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="stat-highlight" style="margin-top: 16px;">
+                        <h4>선택 기준</h4>
+                        <p>📚 <strong>학습용:</strong> ChromaDB</p>
+                        <p>🚀 <strong>스타트업:</strong> FAISS + Redis</p>
+                        <p>🏢 <strong>기업:</strong> Pinecone / Qdrant</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">8 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 9: Query 처리 및 프롬프트 엔지니어링 -->
+    <div class="slide" role="article" aria-label="슬라이드 9: Query 처리 파이프라인">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>Query 처리 파이프라인: 실시간 응답 생성</h2>
+            
+            <div class="process-card">
+                <h3>Query Phase (실시간 검색 단계)</h3>
+                <div class="architecture-flow">
+                    <div class="flow-step">Query 분석</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Query 확장</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">벡터 검색</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Re-ranking</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">프롬프트 구성</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">LLM 생성</div>
+                </div>
+            </div>
+            
+            <div class="split" style="margin-top: 24px;">
+                <div class="col text">
+                    <div class="step" style="max-width: 100%; margin: 12px 0;">
+                        <h4>1. Query 전처리 기법</h4>
+                        <p><strong>Query Expansion:</strong> 동의어 추가로 재현율 향상</p>
+                        <p>예: "주택담보대출" → "주택담보대출, 주담대, 모기지론"</p>
+                        <p><strong>Query Decomposition:</strong> 복잡한 질문 분해</p>
+                        <p>예: "30대 직장인 대출 조건" → "연령 조건" + "소득 조건"</p>
+                    </div>
+                    
+                    <div class="step" style="max-width: 100%; margin: 12px 0;">
+                        <h4>2. 검색 결과 Re-ranking</h4>
+                        <p><strong>Cross-Encoder:</strong> 쿼리-문서 쌍 정밀 평가</p>
+                        <p><strong>MMR (최대 한계 관련성):</strong> 다양성과 관련성 균형</p>
+                        <p><strong>Cohere Rerank:</strong> API 기반 재순위화</p>
+                    </div>
+                </div>
+                <div class="col text">
+                    <div class="prompt-card" style="max-width: 100%;">
+                        <h3>프롬프트 템플릿 설계</h3>
+                        <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px; font-size: 0.9em;">
+<code>당신은 금융 전문 AI 어시스턴트입니다.
+아래 제공된 컨텍스트만을 사용하여 질문에 답변하세요.
+
+컨텍스트:
+{context}
+
+질문: {question}
+
+답변 규칙:
+1. 컨텍스트에 없는 정보는 추측하지 마세요
+2. 숫자와 금리는 정확히 인용하세요
+3. 출처를 명시하세요
+4. 확실하지 않으면 "정보 부족"이라고 답하세요
+
+답변:</code></pre>
+                    </div>
+                    
+                    <div class="warning" style="margin-top: 16px;">
+                        <h4>⚡ 성능 최적화 팁</h4>
+                        <p>• Top-K는 5-10개가 적정 (너무 많으면 노이즈)</p>
+                        <p>• 캐싱으로 반복 질문 처리 속도 90% 향상</p>
+                        <p>• 스트리밍 응답으로 체감 속도 개선</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">9 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 7: 하이브리드 검색 전략 -->
+    <div class="slide" role="article" aria-label="슬라이드 7: 하이브리드 검색 전략">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>두 가지 검색 방법을 합친 하이브리드 검색</h2>
+            
+            <div class="split">
+                <div class="col" style="flex: 1.2;">
+                    <h3>검색 방식 비교</h3>
+                    <table class="comparison-table" style="font-size: 0.9em;">
+                        <thead>
+                            <tr>
+                                <th>방식</th>
+                                <th>특징</th>
+                                <th>언제 사용?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>벡터<br>검색</strong></td>
+                                <td>의미가 비슷한<br>문서 찾기</td>
+                                <td>"주택 구매 방법"<br>같은 일반 질문</td>
+                            </tr>
+                            <tr>
+                                <td><strong>키워드<br>검색</strong></td>
+                                <td>정확한 단어<br>찾기</td>
+                                <td>"NH올원뱅크"<br>같은 상품명</td>
+                            </tr>
+                            <tr style="background: var(--pastel-green);">
+                                <td><strong>하이브리드</strong></td>
+                                <td>두 방법<br>동시 사용</td>
+                                <td>실제 서비스</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="analogy" style="margin-top: 20px;">
+                        <p><strong>쉬운 비유:</strong><br>
+                        벡터 검색 = 비슷한 주제 찾기 ("집 사는 법" → "부동산 구매 가이드")<br>
+                        키워드 검색 = 정확한 이름 찾기 ("NH농협" → "NH농협" 문서만)<br>
+                        하이브리드 = 둘 다 사용해서 더 정확한 답 찾기</p>
+                    </div>
+                </div>
+                
+                <div class="col" style="flex: 1;">
+                    <h3>실제 구현 방법</h3>
+                    <div class="prompt-card" style="font-size: 0.85em;">
+                        <p><strong>간단한 코드 예시:</strong></p>
+                        <pre style="background: #f8f9fa; padding: 12px; border-radius: 8px; overflow-x: auto;">
+<code># 1. 벡터 검색 (의미 검색)
+vector_search = vectorstore.search(
+    query="주택담보대출", 
+    method="similarity"
+)
+
+# 2. 키워드 검색 (정확한 단어)
+keyword_search = bm25.search(
+    query="주택담보대출",
+    method="exact_match"  
+)
+
+# 3. 두 결과 합치기
+final_results = combine(
+    vector_search * 0.7 +  # 70%
+    keyword_search * 0.3   # 30%
+)</code></pre>
+                    </div>
+                    
+                    <div class="case-study" style="margin-top: 20px;">
+                        <h4>실제 사례: 은행 챗봇</h4>
+                        <p><strong>질문:</strong> "NH올원뱅크 금리 알려줘"</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                            <div style="background: var(--pastel-pink); padding: 10px; border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9em;"><strong>벡터만:</strong><br>일반 금리 정보<br>정확도 68%</p>
+                            </div>
+                            <div style="background: var(--pastel-green); padding: 10px; border-radius: 8px;">
+                                <p style="margin: 0; font-size: 0.9em;"><strong>하이브리드:</strong><br>정확한 상품 정보<br>정확도 92%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">10 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 10: Morgan Stanley 사례 Part 1 - 도입 배경 -->
+    <div class="slide" role="article" aria-label="슬라이드 10: Morgan Stanley RAG 도입 배경">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>Morgan Stanley 사례: 글로벌 투자은행의 RAG 혁신</h2>
+            
+            <div class="split">
+                <div class="col image">
+                    <figure class="img-slot" style="--img-w: 80%; --img-max-h: 55vh;">
+                        <img src="images/morgan_stanley_case.png" 
+                             alt="Morgan Stanley 오피스에서 RAG 도입 전후 비교 - 새벽 2시의 지친 애널리스트와 오전 10시의 편안한 애널리스트" 
+                             loading="lazy">
+                        <figcaption>RAG 도입으로 업무 효율성이 크게 향상된 Morgan Stanley</figcaption>
+                    </figure>
+                </div>
+                <div class="col text">
+                    <div class="kpi-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="case-study" style="margin: 0;">
+                            <h3>도입 배경</h3>
+                            <p>• <strong>30만 개+</strong> 리서치 리포트 보유</p>
+                            <p>• <strong>16,000명</strong> 금융 어드바이저 근무</p>
+                            <p>• <strong>일일 수천 건</strong> 고객 문의 처리</p>
+                            <p>• <strong>주당 5시간</strong> 정보 검색에 소요</p>
+                        </div>
+                        
+                        <div class="warning" style="margin: 0;">
+                            <h3>기존 문제점</h3>
+                            <p>• 키워드 검색의 한계로 정보 누락</p>
+                            <p>• 서로 다른 시스템에 데이터 분산</p>
+                            <p>• 신입 직원의 긴 학습 곡선</p>
+                            <p>• 최신 정보 업데이트 지연</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-highlight" style="margin-top: 0px;">
+                <h4>RAG 도입 결정 요인</h4>
+                <table class="comparison-table" style="font-size: 0.9em;">
+                    <thead>
+                        <tr>
+                            <th>문제점</th>
+                            <th>기존 방식</th>
+                            <th>RAG 솔루션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>정보 검색</strong></td>
+                            <td>수동 키워드 검색</td>
+                            <td>의미 기반 자동 검색</td>
+                        </tr>
+                        <tr>
+                            <td><strong>지식 통합</strong></td>
+                            <td>여러 시스템 각각 조회</td>
+                            <td>단일 통합 인터페이스</td>
+                        </tr>
+                        <tr>
+                            <td><strong>업데이트</strong></td>
+                            <td>주기적 수동 업데이트</td>
+                            <td>실시간 자동 반영</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="process-card">
+                <h3>구현 아키텍처</h3>
+                <div class="architecture-flow" style="margin: 0px 0;">
+                    <div class="flow-step">데이터<br><small>PDF, 이메일, 회의록</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Chunking<br><small>단락 + 메타데이터</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">임베딩<br><small>OpenAI Ada</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">검색<br><small>하이브리드</small></div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">LLM<br><small>GPT-4</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-number">11 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 12: Morgan Stanley 사례 Part 2 - 구현 및 성과 -->
+    <div class="slide" role="article" aria-label="슬라이드 12: Morgan Stanley RAG 구현 및 성과">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>Morgan Stanley RAG 시스템: 구현 및 성과</h2>
+            
+            <div class="split">
+                <div class="col">
+                    <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                        <h3 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">Performance Metrics</h3>
+                        
+                        <!-- 검색 시간 -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <h4 style="color: #667eea; margin-bottom: 12px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px;">Search Time</h4>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; border-left: 3px solid #e74c3c;">
+                                        <p style="font-size: 0.8em; color: #718096; margin: 0;">BEFORE</p>
+                                        <p style="font-size: 1.4em; font-weight: bold; color: #2d3748; margin: 2px 0;">5시간/주</p>
+                                    </div>
+                                </div>
+                                <div style="flex: 0 0 40px; text-align: center;">
+                                    <span style="display: inline-block; width: 30px; height: 2px; background: #667eea; position: relative;">
+                                        <span style="position: absolute; right: -8px; top: -4px; border: solid #667eea; border-width: 0 2px 2px 0; padding: 3px; transform: rotate(-45deg);"></span>
+                                    </span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 12px; border-radius: 8px;">
+                                        <p style="font-size: 0.8em; color: rgba(255,255,255,0.9); margin: 0;">AFTER</p>
+                                        <p style="font-size: 1.4em; font-weight: bold; color: white; margin: 2px 0;">30분/주</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">90% 감소</span>
+                            </div>
+                        </div>
+                        
+                        <!-- 정확도 -->
+                        <div style="background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <h4 style="color: #667eea; margin-bottom: 12px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px;">Accuracy</h4>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; border-left: 3px solid #e74c3c;">
+                                        <p style="font-size: 0.8em; color: #718096; margin: 0;">BEFORE</p>
+                                        <p style="font-size: 1.4em; font-weight: bold; color: #2d3748; margin: 2px 0;">72%</p>
+                                    </div>
+                                </div>
+                                <div style="flex: 0 0 40px; text-align: center;">
+                                    <span style="display: inline-block; width: 30px; height: 2px; background: #667eea; position: relative;">
+                                        <span style="position: absolute; right: -8px; top: -4px; border: solid #667eea; border-width: 0 2px 2px 0; padding: 3px; transform: rotate(-45deg);"></span>
+                                    </span>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 8px 12px; border-radius: 8px;">
+                                        <p style="font-size: 0.8em; color: rgba(255,255,255,0.9); margin: 0;">AFTER</p>
+                                        <p style="font-size: 1.4em; font-weight: bold; color: white; margin: 2px 0;">94%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">+22%p 향상</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ROI -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(102,126,234,0.3);">
+                            <h4 style="color: white; margin-bottom: 12px; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; text-align: center;">Return on Investment</h4>
+                            <div style="display: flex; justify-content: space-around; align-items: center;">
+                                <div style="text-align: center;">
+                                    <p style="font-size: 0.8em; color: rgba(255,255,255,0.8); margin: 0;">투자액</p>
+                                    <p style="font-size: 1.8em; font-weight: bold; color: white; margin: 5px 0;">$2M</p>
+                                </div>
+                                <div style="font-size: 2em; color: white;">×</div>
+                                <div style="text-align: center;">
+                                    <p style="font-size: 2.5em; font-weight: bold; color: #fbbf24; margin: 0;">7.5</p>
+                                    <p style="font-size: 0.8em; color: rgba(255,255,255,0.8); margin: 0;">배 수익</p>
+                                </div>
+                                <div style="font-size: 2em; color: white;">=</div>
+                                <div style="text-align: center;">
+                                    <p style="font-size: 0.8em; color: rgba(255,255,255,0.8); margin: 0;">연간 절감</p>
+                                    <p style="font-size: 1.8em; font-weight: bold; color: #fbbf24; margin: 5px 0;">$15M</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="warning" style="height: 100%;">
+                        <h3>보안 및 컴플라이언스</h3>
+                        <div style="margin: 20px 0;">
+                            <h4>🔒 데이터 보안</h4>
+                            <p>• <strong>데이터 격리:</strong> 고객 데이터와 공개 데이터 분리</p>
+                            <p>• <strong>액세스 제어:</strong> 역할 기반 문서 접근 권한</p>
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <h4>📝 규제 준수</h4>
+                            <p>• <strong>감사 로그:</strong> 모든 질의와 응답 기록</p>
+                            <p>• <strong>할루시네이션 방지:</strong> 답변 검증 레이어 추가</p>
+                        </div>
+                        
+                        <div class="stat-highlight" style="margin-top: 20px;">
+                            <h4>핵심 성과</h4>
+                            <p style="font-size: 1.3em; margin: 10px 0;">
+                                <strong style="color: var(--accent);">16,000명</strong>의 어드바이저가<br>
+                                <strong style="color: var(--accent);">30만 개</strong> 문서를<br>
+                                <strong style="color: var(--accent);">3분 안에</strong> 검색
+                            </p>
+                        </div>
+                        
+                        <div class="solution" style="margin-top: 20px;">
+                            <p>RAG는 단순한 기술이 아닌, 금융업의 업무 방식을 바꾸는 혁신</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">12 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대행교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 13: RAG 시스템 통합과 실제 활용 -->
+    <div class="slide" role="article" aria-label="슬라이드 13: RAG 시스템 통합과 실제 활용">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>RAG 시스템 통합: 모든 구성요소의 조화</h2>
+            
+            <div class="process-card" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); margin-bottom: 24px;">
+                <h3 style="color: white; text-align: center; margin-bottom: 24px;">RAG 파이프라인 전체 흐름</h3>
+                
+                <div class="architecture-flow" style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px;">
+                    <div class="flow-step">1. 문서 입력<br><small>PDF, DOCX, TXT</small></div>
+                    <div class="flow-arrow" style="color: white;">→</div>
+                    <div class="flow-step">2. 청킹<br><small>1000자 단위</small></div>
+                    <div class="flow-arrow" style="color: white;">→</div>
+                    <div class="flow-step">3. 임베딩<br><small>벡터 변환</small></div>
+                    <div class="flow-arrow" style="color: white;">→</div>
+                    <div class="flow-step">4. 저장<br><small>Vector DB</small></div>
+                    <div class="flow-arrow" style="color: white;">→</div>
+                    <div class="flow-step">5. 검색<br><small>유사도 매칭</small></div>
+                    <div class="flow-arrow" style="color: white;">→</div>
+                    <div class="flow-step">6. 생성<br><small>답변 생성</small></div>
+                </div>
+            </div>
+            
+            <div class="split">
+                <div class="col">
+                    <div class="warning" style="height: 100%;">
+                        <h3>왜 RAG가 필요한가? - 핵심 가치</h3>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin: 12px 0;">✅ <strong>정확성:</strong> 환각(Hallucination) 현상을 40% 감소시킴</li>
+                            <li style="margin: 12px 0;">✅ <strong>신뢰성:</strong> 모든 답변에 출처 문서 제공</li>
+                            <li style="margin: 12px 0;">✅ <strong>최신성:</strong> 실시간 문서 업데이트 가능</li>
+                            <li style="margin: 12px 0;">✅ <strong>경제성:</strong> LLM 재학습 없이 지식 확장</li>
+                        </ul>
+                        
+                        <div class="stat-highlight" style="margin-top: 20px;">
+                            <h4>도입 효과</h4>
+                            <p>• 검색 시간: <strong>90% 단축</strong></p>
+                            <p>• 정확도: <strong>25% 향상</strong></p>
+                            <p>• 비용: <strong>70% 절감</strong></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="prompt-card">
+                        <h3>실제 동작 예시: 금융 상담</h3>
+                        <p><strong>질문:</strong> "주택담보대출 금리가 어떻게 되나요?"</p>
+                        
+                        <div class="kpi-grid" style="grid-template-columns: 1fr; margin: 15px 0;">
+                            <div class="kpi" style="background: var(--pastel-blue); padding: 12px;">
+                                <h4>RAG 처리 과정</h4>
+                                <p style="font-size: 0.95em;">
+                                1️⃣ 질문을 벡터로 변환 (임베딩)<br>
+                                2️⃣ 관련 금융 문서 3개 검색 (유사도 0.85+)<br>
+                                3️⃣ 검색된 문서를 컨텍스트로 제공<br>
+                                4️⃣ LLM이 컨텍스트 기반으로 답변 생성
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="solution">
+                            <p><strong>AI 답변:</strong></p>
+                            <p>"현재 주택담보대출 금리는 변동금리 연 3.5~5.2%, 고정금리 연 4.0~5.5%입니다."</p>
+                            <p style="font-size: 0.9em; color: var(--muted);"><em>출처: 한국은행 기준금리 공시 (2024.08)</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">13 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 13: 학습 정리 -->
+    <div class="slide" role="article" aria-label="슬라이드 13: 학습 정리 및 핵심 체크">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>오늘의 핵심: RAG 개념 이해</h2>
+            
+            <div class="split">
+                <div class="col image">
+                    <figure class="img-slot" style="--img-w: 100%; --img-max-h: 45vh;">
+                        <img src="../common/images/checklist.png" 
+                             alt="학습 체크리스트" 
+                             style="opacity: 0.9;"
+                             loading="lazy">
+                        <figcaption>RAG 프레임워크 학습 완료</figcaption>
+                    </figure>
+                    
+                    <div class="prompt-card" style="margin-top: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <h3 style="color: white;">⚡ 30분 RAG 구현 코드</h3>
+                        <code style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 4px; display: block; color: white; font-size: 0.9em;">
+from langchain import ChromaDB
+vectorstore = ChromaDB.from_documents(docs)
+qa_chain = RetrievalQA(llm, vectorstore)
+result = qa_chain("질문")
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="col text">
+                    <div class="stat-highlight" style="margin-bottom: 24px;">
+                        <h4>🎯 핵심 3줄 요약</h4>
+                        <p style="text-align: left; line-height: 1.8;">
+                            1️⃣ <strong>Chunking</strong>: 문서를 1000자씩 나누어 처리<br>
+                            2️⃣ <strong>Embedding</strong>: 텍스트를 1536차원 벡터로 변환<br>
+                            3️⃣ <strong>Vector Search</strong>: 의미적 유사도로 정보 검색
+                        </p>
+                    </div>
+                    
+                    <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="kpi">
+                            <h4>기억할 숫자</h4>
+                            <p><strong>90%</strong> 검색 시간 단축<br>
+                            <strong>40%</strong> 환각 현상 감소</p>
+                        </div>
+                        <div class="kpi">
+                            <h4>핵심 도구</h4>
+                            <p><strong>LangChain</strong> 프레임워크<br>
+                            <strong>ChromaDB</strong> 벡터 저장소</p>
+                        </div>
+                    </div>
+                    
+                    <div class="solution" style="margin-top: 24px;">
+                        <h3>✅ 이제 당신도 할 수 있습니다!</h3>
+                        <p>"PDF 문서를 읽고 질문에 답하는 AI"를 직접 만들 수 있는 <span class="highlight">모든 지식을 습득</span>했습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">14 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <!-- 슬라이드 14: 다음 차시 예고 -->
+    <div class="slide" role="article" aria-label="슬라이드 14: 다음 차시 예고">
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>다음 차시: 직접 만드는 나만의 AI 금융 비서</h2>
+            
+            <div class="split">
+                <div class="col">
+                    <div class="process-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%;">
+                        <h3 style="color: white; font-size: 1.5em; margin-bottom: 24px;">1주차 2차시: 실습 및 토론</h3>
+                        
+                        <div class="kpi-grid" style="grid-template-columns: 1fr; gap: 16px;">
+                            <div class="kpi" style="background: rgba(255,255,255,0.95);">
+                                <h4 style="color: #667eea;">파트 1: 실습 (30분)</h4>
+                                <p>• Google Colab에서 직접 코딩</p>
+                                <p>• 실제 금융 데이터 사용</p>
+                                <p>• 10분 만에 챗봇 완성</p>
+                            </div>
+                            <div class="kpi" style="background: rgba(255,255,255,0.95);">
+                                <h4 style="color: #764ba2;">파트 2: 토론 (15분)</h4>
+                                <p>• 실무 적용 아이디어</p>
+                                <p>• 구현 경험 공유</p>
+                                <p>• Q&A 세션</p>
+                            </div>
+                        </div>
+                        
+                        <div class="chips" style="margin-top: 20px; justify-content: flex-start;">
+                            <span class="chip" style="background: white; color: var(--accent);">#핸즈온</span>
+                            <span class="chip" style="background: white; color: var(--accent);">#실무적용</span>
+                            <span class="chip" style="background: white; color: var(--accent);">#AI금융비서</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col">
+                    <div class="stat-highlight" style="margin-bottom: 20px;">
+                        <h4 style="font-size: 1.3em; margin-bottom: 16px;">실습에서 만들 것들</h4>
+                        <div style="text-align: left; font-size: 1.05em;">
+                            <p style="margin: 10px 0;">✅ <strong>금융 PDF 분석기</strong><br>
+                            <small>연차보고서, 공시 자료 자동 분석</small></p>
+                            <p style="margin: 10px 0;">✅ <strong>Q&A 챗봇</strong><br>
+                            <small>"이 회사의 영업이익률은?" 즉시 답변</small></p>
+                            <p style="margin: 10px 0;">✅ <strong>투자 리포트 요약기</strong><br>
+                            <small>100페이지 → 핵심 3줄</small></p>
+                            <p style="margin: 10px 0;">✅ <strong>규제 변경 알림봇</strong><br>
+                            <small>실시간 업데이트</small></p>
+                        </div>
+                    </div>
+                    
+                    <div class="warning" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border: none;">
+                        <h3 style="color: #2d3436;">미리 준비하세요!</h3>
+                        <p style="color: #2d3436;"><strong>1. Google 계정</strong> (무료 Colab 사용)</p>
+                        <p style="color: #2d3436;"><strong>2. OpenAI API 키</strong></p>
+                        <p style="color: #2d3436;"><strong>3. 분석하고 싶은 금융 문서</strong> (PDF)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-number">15 / 15</div>
+        <div class="footer">
+            <div class="prof-name">김종락 교수</div>
+            <div class="dept">서강대학교 수학과</div>
+        </div>
+    </div>
+
+    <script>
+        // 슬라이드 네비게이션
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        // 초기 설정
+        function initSlides() {
+            slides.forEach((slide, index) => {
+                if (index !== 0) {
+                    slide.style.display = 'none';
+                }
+            });
+            updateProgress();
+            
+            // 네비게이션 힌트 3초 후 숨기기
+            setTimeout(() => {
+                const hint = document.getElementById('navHint');
+                if (hint) hint.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            
+            slides.forEach(slide => slide.style.display = 'none');
+            slides[index].style.display = 'flex';
+            currentSlide = index;
+            updateProgress();
+            
+            // 페이지 번호 업데이트
+            document.querySelectorAll('.page-number').forEach((elem, i) => {
+                elem.textContent = `${i + 1} / ${totalSlides}`;
+            });
+        }
+        
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            const progressBar = document.getElementById('topProgress');
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+        }
+        
+        // 키보드 네비게이션
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    showSlide(currentSlide + 1);
+                    break;
+                case 'ArrowLeft':
+                    showSlide(currentSlide - 1);
+                    break;
+                case 'Home':
+                    showSlide(0);
+                    break;
+                case 'End':
+                    showSlide(totalSlides - 1);
+                    break;
+            }
+        });
+        
+        // 마우스 클릭 네비게이션
+        document.addEventListener('click', (e) => {
+            // 특정 요소 클릭 시 네비게이션 방지
+            if (e.target.tagName === 'A' || 
+                e.target.tagName === 'BUTTON' ||
+                e.target.closest('pre') ||
+                e.target.closest('.page-number')) {
+                return;
+            }
+            
+            const clickX = e.clientX;
+            const windowWidth = window.innerWidth;
+            
+            if (clickX > windowWidth * 0.6) {
+                showSlide(currentSlide + 1);
+            } else if (clickX < windowWidth * 0.4) {
+                showSlide(currentSlide - 1);
+            }
+        });
+        
+        // 페이지 번호 클릭 시 첫 페이지로
+        document.querySelectorAll('.page-number').forEach(pageNum => {
+            pageNum.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showSlide(0);
+            });
+        });
+        
+        // 초기화
+        initSlides();
+    </script>
+
+</body>
+</html>

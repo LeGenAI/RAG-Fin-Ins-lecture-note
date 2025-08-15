@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG를 이용한 나만의 AI 금융 비서 만들기 - 2주차 1차시</title>
+    <!-- hashtags: #AI맞춤데이터 #개인메타데이터 #금융데이터변환 #RAG구현 #마이크로러닝 #KMOOC -->
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #111111;
+            --muted: #6b7280;
+            --accent: #d90429; /* 국제 타이포그래피 스타일의 포인트 컬러 */
+            --rule: #111111;
+            --secondary: #27ae60; /* 성공 그린 */
+            --info: #3498db; /* 정보 블루 */
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.6;
+            letter-spacing: 0.2px;
+        }
+        
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 64px;
+            position: relative;
+        }
+        
+        .slide-content {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            max-width: 980px;
+            width: 100%;
+            text-align: left;
+        }
+        
+        h1 {
+            color: var(--fg);
+            font-size: 2.1em;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+        
+        h2 {
+            color: var(--accent);
+            font-size: 1.4em;
+            margin: 8px 0 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        
+        h3 {
+            color: var(--info);
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: 1.05em;
+            margin-bottom: 16px;
+            color: var(--fg);
+        }
+        
+        .highlight { background: #fff4f5; padding: 2px 6px; border-radius: 4px; color: var(--accent); font-weight: 600; }
+        
+        .info-box {
+            background: #e3f2fd;
+            border: 2px solid #90caf9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .code-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            margin: 16px 0;
+            overflow-x: auto;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 0.95em;
+            letter-spacing: 0.05em;
+        }
+        
+        .progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+        
+        .step-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 2px solid #e3f2fd;
+            padding: 20px;
+            margin: 10px;
+            flex: 1;
+            min-width: 220px;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .step h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        
+        .step .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .analogy { 
+            background: #f8f9fa; 
+            border-left: 4px solid var(--accent); 
+            padding: 16px 20px; 
+            margin: 20px 0; 
+            font-style: italic;
+        }
+
+        .objectives {
+            text-align: left;
+            margin: 20px auto 0;
+            max-width: 800px;
+        }
+        .objectives li { 
+            margin: 8px 0; 
+            font-size: 1.05em; 
+            list-style: none;
+            padding-left: 20px;
+            position: relative;
+        }
+        .objectives li:before {
+            content: "✓";
+            color: var(--secondary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 4px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .flow-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            min-width: 140px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .arrow {
+            font-size: 1.8em;
+            color: var(--accent);
+            margin: 0 8px;
+        }
+        
+        /* 이미지 플레이스홀더 */
+        figure.img-slot {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 24px 0;
+            background: #f8fafc;
+        }
+        .img-slot .ph {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #e2e8f0;
+            display: grid;
+            place-items: center;
+            color: #64748b;
+            font-size: 1.1em;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .img-slot figcaption { 
+            color: #6b7280; 
+            font-size: 0.9em; 
+            text-align: center;
+        }
+        
+        .split { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 40px; 
+            align-items: center; 
+        }
+        
+        .data-example {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .data-example h5 {
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .format-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .format-box {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .format-box.before {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .format-box.after {
+            border-color: var(--secondary);
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 슬라이드 1: 타이틀 & 학습목표 -->
+<div class="slide">
+    <div class="progress" style="width: 12.5%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h1>개인 메타데이터를 AI 맞춤 데이터로 변환</h1>
+        <h2>RAG를 이용한 나만의 AI 금융 비서 만들기 - 2주차 1차시</h2>
+        <p class="tagline" style="color: #666; font-size: 1.1em; margin-bottom: 30px;">내 데이터를 AI가 이해할 수 있게 만드는 첫 번째 단계</p>
+        
+        <ul class="objectives">
+            <li>개인 메타데이터의 개념과 중요성을 이해한다</li>
+            <li>금융 데이터를 AI가 처리 가능한 형태로 변환하는 방법을 익힌다</li>
+            <li>텍스트 데이터를 .md, .json 형식으로 변환할 수 있다</li>
+            <li>RAG 시스템에 적합한 데이터 구조를 설계할 수 있다</li>
+        </ul>
+        
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+            <span class="badge">#메타데이터</span>
+            <span class="badge">#데이터변환</span>
+            <span class="badge">#JSON</span>
+            <span class="badge">#Markdown</span>
+            <span class="badge">#금융데이터</span>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 2: 메타데이터란 무엇인가? -->
+<div class="slide">
+    <div class="progress" style="width: 25%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>📊 메타데이터(Metadata)란?</h2>
+        
+        <div class="info-box">
+            <h3 style="margin-top: 0;">정의</h3>
+            <p><span class="highlight">메타데이터</span>는 "데이터에 대한 데이터"로, 원본 데이터의 특성, 구조, 의미를 설명하는 정보입니다.</p>
+        </div>
+
+        <div class="analogy">
+            <h4>🏷️ 쉬운 비유: 도서관의 도서카드</h4>
+            <p>책(원본 데이터) 자체가 아니라, 책의 <strong>제목, 저자, 출간연도, 분류번호</strong> 등이 적힌 카드가 메타데이터입니다. 이 정보로 원하는 책을 빠르게 찾을 수 있죠!</p>
+        </div>
+
+        <div class="step-container">
+            <div class="step">
+                <span class="icon">📋</span>
+                <h4>일반 메타데이터</h4>
+                <p>파일명, 생성일시, 크기, 형식 등</p>
+            </div>
+            
+            <div class="step">
+                <span class="icon">💰</span>
+                <h4>금융 메타데이터</h4>
+                <p>거래일시, 계좌번호, 거래유형, 금액 등</p>
+            </div>
+            
+            <div class="step">
+                <span class="icon">🤖</span>
+                <h4>AI 메타데이터</h4>
+                <p>데이터 의미, 관계, 중요도, 사용 맥락 등</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 3: 왜 개인 메타데이터가 중요한가? -->
+<div class="slide">
+    <div class="progress" style="width: 37.5%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>🎯 왜 개인 메타데이터가 중요한가?</h2>
+        
+        <div class="flow-diagram" style="flex-direction: column; gap: 30px;">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;">
+                <div class="flow-box" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24);">원본 금융 데이터</div>
+                <div class="arrow">→</div>
+                <div class="flow-box" style="background: linear-gradient(135deg, #feca57, #ff9ff3);">메타데이터 추가</div>
+                <div class="arrow">→</div>
+                <div class="flow-box" style="background: linear-gradient(135deg, #48dbfb, #0abde3);">AI 이해 가능</div>
+            </div>
+        </div>
+
+        <div class="format-comparison">
+            <div class="format-box before">
+                <h5 style="color: #dc3545; margin-bottom: 10px;">❌ 변환 전</h5>
+                <div class="code-box">
+                    <p>2024-01-15 KB국민은행 -50000원</p>
+                    <p>2024-01-16 신한카드 -120000원</p>
+                    <p>2024-01-17 월급 +3000000원</p>
+                </div>
+                <p style="font-size: 0.9em; color: #666;">AI가 맥락을 이해하기 어려움</p>
+            </div>
+            
+            <div class="format-box after">
+                <h5 style="color: var(--secondary); margin-bottom: 10px;">✅ 변환 후</h5>
+                <div class="code-box">
+                    <p>"거래유형": "적금납입"<br>
+                    "카테고리": "저축"<br>
+                    "중요도": "높음"<br>
+                    "관련목표": "내집마련"</p>
+                </div>
+                <p style="font-size: 0.9em; color: #666;">AI가 의도와 맥락을 이해</p>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <p style="margin: 0; text-align: center;"><strong>🎯 핵심:</strong> 메타데이터가 있어야 AI가 개인화된 맞춤 조언을 할 수 있습니다!</p>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 4: 금융 데이터 변환 프로세스 -->
+<div class="slide">
+    <div class="progress" style="width: 50%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>🔄 금융 데이터 변환 프로세스</h2>
+        
+        <div class="flow-diagram" style="flex-direction: column; gap: 20px;">
+            <div style="text-align: center;">
+                <div class="flow-box" style="background: linear-gradient(135deg, #a8e6cf, #88d8c0);">1단계: 원본 데이터 수집</div>
+            </div>
+            <div class="arrow" style="transform: rotate(90deg);">→</div>
+            <div style="text-align: center;">
+                <div class="flow-box" style="background: linear-gradient(135deg, #ffd93d, #ff6b6b);">2단계: 의미 분석 및 분류</div>
+            </div>
+            <div class="arrow" style="transform: rotate(90deg);">→</div>
+            <div style="text-align: center;">
+                <div class="flow-box" style="background: linear-gradient(135deg, #74b9ff, #6c5ce7);">3단계: 구조화된 형식 변환</div>
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step">
+                <span class="icon">📥</span>
+                <h4>데이터 수집</h4>
+                <p>통장 내역, 카드 명세서, 보험 계약서 등</p>
+                <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
+                    PDF, 엑셀, 텍스트 파일
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="icon">🔍</span>
+                <h4>의미 분석</h4>
+                <p>거래 목적, 패턴, 중요도 파악</p>
+                <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
+                    생활비, 투자, 보험, 대출 등
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="icon">📝</span>
+                <h4>형식 변환</h4>
+                <p>AI가 읽을 수 있는 형태로 변환</p>
+                <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
+                    JSON, Markdown, CSV
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 5: Markdown 형식 변환 -->
+<div class="slide">
+    <div class="progress" style="width: 62.5%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>📝 Markdown(.md) 형식 변환</h2>
+        
+        <div class="info-box">
+            <h3 style="margin-top: 0;">Markdown이란?</h3>
+            <p>간단한 문법으로 구조화된 문서를 만들 수 있는 <span class="highlight">경량 마크업 언어</span>입니다. AI가 이해하기 쉽고, 사람이 읽기도 편합니다.</p>
+        </div>
+
+        <div class="data-example">
+            <h5>💳 신용카드 사용 내역 → Markdown 변환 예시</h5>
+            <div class="code-box">
+# 2024년 1월 신용카드 사용 내역
+
+## 식비 관련
+- **2024-01-15**: 스타벅스 - 6,500원 (카페)
+- **2024-01-16**: 맥도날드 - 8,900원 (패스트푸드)
+
+## 교통비 관련  
+- **2024-01-17**: 지하철 - 2,000원 (대중교통)
+- **2024-01-18**: 택시 - 12,000원 (야간 긴급)
+
+## 쇼핑 관련
+- **2024-01-19**: 이마트 - 85,000원 (생필품)
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h4>✅ Markdown의 장점</h4>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>구조화된 정보로 AI가 카테고리별로 이해 가능</li>
+                <li>사람이 읽기 쉬워 검토 및 수정이 용이</li>
+                <li>다른 형식으로 쉽게 변환 가능</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 6: JSON 형식 변환 -->
+<div class="slide">
+    <div class="progress" style="width: 75%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>🗃️ JSON 형식 변환</h2>
+        
+        <div class="info-box">
+            <h3 style="margin-top: 0;">JSON이란?</h3>
+            <p><span class="highlight">JavaScript Object Notation</span>의 약자로, 데이터를 키-값 쌍으로 저장하는 형식입니다. AI가 정확하게 데이터를 처리할 수 있습니다.</p>
+        </div>
+
+        <div class="data-example">
+            <h5>🏦 보험 계약 정보 → JSON 변환 예시</h5>
+            <div class="code-box">
+{
+  "보험정보": {
+    "계약번호": "ABC-2024-001",
+    "상품명": "종합건강보험",
+    "보험사": "삼성화재",
+    "가입일": "2024-01-01",
+    "보험료": {
+      "월보험료": 85000,
+      "납입방법": "자동이체",
+      "납입일": 15
+    },
+    "보장내용": {
+      "입원비": "일당 10만원",
+      "수술비": "최대 500만원",
+      "암진단": "2000만원"
+    },
+    "수익자": "홍길동",
+    "태그": ["건강", "가족보장", "필수보험"]
+  }
+}
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h4>✅ JSON의 장점</h4>
+            <ul style="margin: 10px 0 0 20px;">
+                <li>정확한 데이터 구조로 AI가 오해 없이 처리 가능</li>
+                <li>복잡한 데이터 관계도 표현 가능</li>
+                <li>프로그래밍 언어에서 바로 사용 가능</li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 7: 실습 예고 -->
+<div class="slide">
+    <div class="progress" style="width: 87.5%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>💻 다음 차시 실습 예고</h2>
+        
+        <div class="info-box">
+            <h3 style="margin-top: 0;">2주차 2차시에서 배울 내용</h3>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li>실제 금융 데이터를 Markdown으로 변환하는 실습</li>
+                <li>Python을 이용한 JSON 파일 생성</li>
+                <li>변환된 데이터의 품질 검증 방법</li>
+                <li>RAG 시스템에 최적화된 데이터 구조 설계</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <h4>🔧 준비사항</h4>
+            <p>여러분의 <span class="highlight">실제 거래내역 몇 개</span>를 준비해보세요! (개인정보는 가명처리하여 연습용으로만 사용합니다)</p>
+        </div>
+
+        <figure class="img-slot">
+            <div class="ph">💻 데이터 변환 실습 화면 미리보기</div>
+            <figcaption>Python 코드로 실제 데이터를 변환하는 과정</figcaption>
+        </figure>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <div class="badge" style="font-size: 1.1em; padding: 10px 20px;">다음 차시: 손으로 직접 해보는 데이터 변환! 🛠️</div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 8: 요약 및 마무리 -->
+<div class="slide">
+    <div class="progress" style="width: 100%;"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>📝 1차시 학습 요약</h2>
+        
+        <div class="step-container" style="margin-bottom: 30px;">
+            <div class="step">
+                <span class="icon">📊</span>
+                <h4>메타데이터</h4>
+                <p>데이터에 대한 데이터, AI 이해의 열쇠</p>
+            </div>
+            
+            <div class="step">
+                <span class="icon">📝</span>
+                <h4>Markdown</h4>
+                <p>구조화된 문서, 읽기 쉬운 형식</p>
+            </div>
+            
+            <div class="step">
+                <span class="icon">🗃️</span>
+                <h4>JSON</h4>
+                <p>정확한 데이터 구조, AI 처리 최적화</p>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <h4>✅ 학습 목표 달성 체크</h4>
+            <p>메타데이터의 중요성을 이해하고, Markdown과 JSON 형식의 차이를 알며, 금융 데이터를 구조화할 수 있다면 목표 달성! 🎉</p>
+        </div>
+
+        <div class="warning">
+            <h4>🔒 개인정보 보호 주의사항</h4>
+            <p>실제 금융 데이터 작업 시에는 반드시 <strong>개인정보를 익명화</strong>하고, <strong>보안이 확보된 환경</strong>에서 진행하세요.</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <p style="font-size: 1.2em; color: var(--accent); margin-bottom: 10px;">🎓 수고하셨습니다!</p>
+            <p style="color: #666;">다음 차시에서는 실제 코딩으로 데이터를 변환해보겠습니다.</p>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<script>
+    // 간단한 슬라이드 네비게이션
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) {
+            currentSlide++;
+            scrollToSlide(currentSlide);
+        } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+            currentSlide--;
+            scrollToSlide(currentSlide);
+        }
+    });
+    
+    function scrollToSlide(index) {
+        slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 클릭으로도 슬라이드 이동
+    document.addEventListener('click', function(e) {
+        const rect = window.innerWidth;
+        if (e.clientX > rect / 2 && currentSlide < slides.length - 1) {
+            currentSlide++;
+            scrollToSlide(currentSlide);
+        } else if (e.clientX < rect / 2 && currentSlide > 0) {
+            currentSlide--;
+            scrollToSlide(currentSlide);
+        }
+    });
+</script>
+
+</body>
+</html>

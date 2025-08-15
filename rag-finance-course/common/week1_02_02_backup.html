@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG를 이용한 나만의 AI 금융 비서 만들기 - 1주차 4차시</title>
+    <!-- hashtags: #RAG #검색증강생성 #금융AI #보험데이터 #마이크로러닝 #KMOOC -->
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #111111;
+            --muted: #6b7280;
+            --accent: #d90429; /* 국제 타이포그래피 스타일의 포인트 컬러 */
+            --rule: #111111;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            line-height: 1.6;
+            letter-spacing: 0.2px;
+        }
+        
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 64px;
+            position: relative;
+        }
+        
+        .slide-content {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            max-width: 980px;
+            width: 100%;
+            text-align: left;
+        }
+        
+        h1 {
+            color: var(--fg);
+            font-size: 2.1em;
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+        
+        h2 {
+            color: var(--accent);
+            font-size: 1.4em;
+            margin: 8px 0 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        
+        h3 {
+            color: #3498db;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: 1.05em;
+            margin-bottom: 16px;
+            color: var(--fg);
+        }
+        
+        .highlight { background: #fff4f5; padding: 0 4px; border-bottom: 2px solid var(--accent); }
+        
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .solution {
+            background: #d1ecf1;
+            border: 2px solid #bee5eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            right: 30px;
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            color: var(--muted);
+            font-weight: 700;
+            font-size: 0.95em;
+            letter-spacing: 0.05em;
+        }
+        
+        .progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--rule);
+            transition: width 0.3s ease;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin: 0 10px;
+        }
+        
+        .step-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            margin: 10px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        .step h4 {
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+        
+        .analogy { background:#f8f9fa; border-left: 4px solid var(--accent); padding: 12px 16px; margin:16px 0; font-style: italic; }
+
+        .objectives {
+            text-align: left;
+            margin: 10px auto 0;
+            max-width: 760px;
+        }
+        .objectives li { margin: 6px 0; font-size: 1.05em; }
+        .badge {
+            display: inline-block;
+            background: #111111;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 18px 0;
+        }
+        .kpi { background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
+        .kpi h4 { color: #2c3e50; margin-bottom: 6px; }
+        .kpi p { margin: 0; font-size: 0.98em; }
+        .tagline { color:#7f8c8d; font-size:0.95em; margin-top:8px; }
+        .quiz {
+            text-align: left;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+        .quiz h3 { color:#2c3e50; margin: 8px 0 6px; }
+        .quiz .q { margin: 12px 0; }
+        .quiz button { background:#111111; color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; }
+        .quiz-result { margin-top: 12px; font-weight:600; }
+        .chips { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+        .chip { background:#ecf0f1; color:#2c3e50; padding:6px 10px; border-radius:999px; font-size:0.9em; }
+
+        .persona {
+            text-align: left;
+            background: #fffaf0;
+            border: 1px solid #f6e58d;
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 860px;
+            margin: 0 auto 12px;
+        }
+        .persona h4 { color:#d35400; margin-bottom:6px; }
+        .flow {
+            display: flex; flex-wrap: wrap; gap:10px; justify-content:center; margin: 12px 0;
+        }
+        .node {
+            background:#ffffff; border:1px solid #dfe6e9; border-radius:10px; padding:10px 12px; min-width:180px;
+        }
+        .arrow { align-self:center; font-size:1.4em; color:#95a5a6; }
+        .prompt-card { background:#f6f7f9; border:1px solid #e5e7eb; border-radius:12px; padding:16px; text-align:left; max-width:860px; margin:0 auto; }
+
+        /* 이미지 플레이스홀더 */
+        figure.img-slot {
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 18px 0;
+        }
+        .img-slot .ph {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #f8fafc;
+            display: grid;
+            place-items: center;
+            color: #94a3b8;
+            font-size: 0.95em;
+        }
+        .img-slot figcaption { color: #6b7280; font-size: 0.9em; }
+
+        /* 레이아웃 변형: 히어로 배경 */
+        .slide { position: relative; }
+        .slide .slide-content { position: relative; z-index: 1; }
+        .hero .img-slot.hero-bg { position: absolute; inset: 0; border: none; padding: 0; }
+        .hero .img-slot.hero-bg .bg-hero { width: 100%; height: 100%; object-fit: cover; opacity: var(--hero-opacity, 0.18); filter: saturate(0) contrast(1.05); }
+        .hero .img-slot.hero-bg figcaption { display: none; }
+
+        /* 레이아웃 변형: 세로 절반 분할 */
+        .split { display: grid; grid-template-columns: minmax(320px,1fr) minmax(320px,1fr); gap: 32px; align-items: center; }
+        .split .col.image img { width: var(--img-w, 100%); height: var(--img-h, auto); max-height: var(--img-max-h, 78vh); object-fit: var(--img-fit, cover); border-radius: var(--img-radius, 12px); }
+
+        /* 레이아웃 변형: 배너형 이미지 */
+        figure.img-slot.banner .ph, figure.img-slot.banner img { aspect-ratio: var(--img-ar, 21/9); width: var(--img-w, 100%); height: var(--img-h, auto); max-height: var(--img-max-h, none); object-fit: var(--img-fit, cover); border-radius: var(--img-radius, 10px); }
+        
+        /* 모든 이미지 공통 변수 제어 (개별 img 또는 부모 figure에 지정 가능) */
+        figure.img-slot img { width: var(--img-w, 100%); height: var(--img-h, auto); max-height: var(--img-max-h, 80vh); aspect-ratio: var(--img-ar, auto); object-fit: var(--img-fit, cover); border-radius: var(--img-radius, 10px); }
+    </style>
+</head>
+<body>
+
+<!-- 슬라이드 1: 타이틀 & 학습목표 -->
+<div class="slide hero">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <figure class="img-slot hero-bg">
+        <img src="../common/images/sky.png" alt="타이틀 배경" class="bg-hero">
+        <figcaption></figcaption>
+    </figure>
+    <div class="slide-content">
+        <h1>AI와 금융의 만남: RAG 기술 소개</h1>
+        <h2>RAG를 이용한 나만의 AI 금융 비서 만들기</h2>
+        <p class="tagline">1Concept + 1Behavior = 1Outcome</p>
+        <!-- 타이틀은 배경형 히어로로 대체 -->
+        <ul class="objectives">
+            <li>RAG의 핵심 개념과 기존 AI와의 차이를 설명할 수 있다.</li>
+            <li>금융·보험 맥락에서 RAG가 필요한 이유를 사례로 제시할 수 있다.</li>
+            <li>(Outcome) 본인의 업무 질문을 RAG 관점으로 재구성해본다.</li>
+        </ul>
+        <div class="chips">
+            <span class="chip">#RAG</span><span class="chip">#금융AI</span><span class="chip">#검색증강생성</span><span class="chip">#마이크로러닝</span>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 2: RAG 전체 프로세스 개요 (배너) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>RAG 전체 프로세스 개요</h2>
+        <figure class="img-slot banner" style="--img-w:90%; --img-ar:21/9;">
+            <img src="images/summary.png" alt="전체 개요">
+        </figure>
+        <p class="tagline">Indexing ↔ Query 두 단계로 이해</p>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 3: Indexing 단계 (split) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content split">
+        <div class="col text">
+            <h2>Indexing 단계</h2>
+            <p>문서 수집 → <strong>Chunking</strong> → <strong>임베딩</strong> → 벡터 DB 저장</p>
+        </div>
+        <div class="col image">
+            <figure class="img-slot banner">
+                <img src="images/chunking.png" alt="Indexing">
+            </figure>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 4: Query 단계 (split) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content split">
+        <div class="col text">
+            <h2>Query 단계</h2>
+            <p>질문 임베딩 → <strong>최근접 검색</strong> → 프롬프트 구성(근거+질문)</p>
+        </div>
+        <div class="col image">
+            <figure class="img-slot banner">
+                <img src="images/vector.png" alt="Query">
+            </figure>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 5: 프롬프트 구성과 제약 -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>프롬프트 구성과 제약</h2>
+        <div class="step-container">
+            <div class="step"><h4>컨텍스트</h4><p>검색된 근거 문단</p></div>
+            <div class="step"><h4>질문</h4><p>사용자 의도 보존</p></div>
+            <div class="step"><h4>제약</h4><p>근거 범위 내에서만 답변</p></div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+<!-- 슬라이드 6: LLM의 역할 -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>LLM의 역할 | 추론 엔진</h2>
+        <p>여러 문서 조각의 내용을 종합, 질문 의도에 맞게 재구성, 자연스러운 서술로 <strong>가공</strong></p>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 7: 하이브리드 검색 맛보기 -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>하이브리드 검색 맛보기</h2>
+        <div class="step-container">
+            <div class="step"><h4>벡터</h4><p>의미 유사성</p></div>
+            <div class="step"><h4>BM25</h4><p>키워드 일치</p></div>
+            <div class="step"><h4>결합</h4><p>정확도 + 재현율</p></div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+    <!-- 확장 섹션: 60분 강의 클립 추가 -->
+    <!-- 클립 1 확장: 왜 RAG인가 (문제 심화) -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col text">
+                <h2>클립 1 확장 | 생성형 AI 도입의 함정</h2>
+                <p>사례: 내부 규정에 대한 환각으로 파일럿 중단. “없던 조항”을 제시해 신뢰 하락.</p>
+                <div class="analogy"><p><strong>핵심:</strong> 막연한 ‘좋다’가 아니라 <span class="highlight">현실적 리스크</span>를 정확히 짚기.</p></div>
+            </div>
+            <div class="col image">
+                <figure class="img-slot" style="--img-fit:cover; --img-max-h:70vh;">
+                    <img src="images/shock.png" alt="ChatGPT 쇼크 사례">
+                </figure>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 1 확장 | 교묘하게 틀린 답의 위험</h2>
+            <figure class="img-slot banner">
+                <img src="images/subtle_error.png" alt="미세한 오류 위험">
+            </figure>
+            <div class="step-container">
+                <div class="step"><h4>금리 3.2% vs 3.25%</h4><p>작아 보여도 의사결정에 영향</p></div>
+                <div class="step"><h4>상품 추천 오류</h4><p>고객 적합성 Miss</p></div>
+                <div class="step"><h4>규정 해석 오류</h4><p>컴플라이언스 리스크</p></div>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col text">
+                <h2>클립 1 확장 | 근거 제시 불가 문제</h2>
+                <p>답은 맞아도 <span class="highlight">근거(문서/조항)</span>가 없으면 책임소재가 불명확.</p>
+                <p class="tagline">RAG의 가치는 <strong>근거 기반</strong> 응답.</p>
+            </div>
+            <div class="col image">
+                <figure class="img-slot" style="--img-fit:contain; --img-max-h:70vh;">
+                    <img src="images/no_evidence.png" alt="근거 없음">
+                </figure>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 클립 2 확장: R-A-G 의미 분석 & 페르소나 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 2 확장 | R-A-G 구성 요소</h2>
+            <div class="step-container">
+                <div class="step"><h4>Retrieval</h4><p>키워드가 아닌 <strong>의미로 찾기</strong></p></div>
+                <div class="step"><h4>Augmented</h4><p>질문 순간에 <strong>맥락을 덧붙이기</strong></p></div>
+                <div class="step"><h4>Generation</h4><p>맥락 <strong>범위 내에서</strong> 생성</p></div>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col text">
+                <h2>클립 2 확장 | 페르소나 Before/After</h2>
+                <p><strong>Before:</strong> “연금보험 추천해줘” (근거 없음)</p>
+                <p><strong>After (RAG):</strong> 조건 기반 검색→근거 문서 인용→맞춤 추천</p>
+            </div>
+            <div class="col image">
+                <figure class="img-slot" style="--img-fit:cover; --img-max-h:70vh;">
+                    <img src="images/persona.png" alt="페르소나 사례">
+                </figure>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 클립 3 확장: Chunking / 임베딩 / 벡터DB 심화 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 3 확장 | Chunking(분할)</h2>
+            <figure class="img-slot banner">
+                <img src="images/chunking.png" alt="Chunking">
+            </figure>
+            <p>문서를 의미 단위로 분할해 검색 정확도와 응답 품질을 향상.</p>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 3 확장 | 임베딩 심화</h2>
+            <figure class="img-slot banner">
+                <img src="images/embedding2.png" alt="임베딩 심화">
+            </figure>
+            <p>단어 관계에서 문장·문단까지 확장된 <strong>문서 임베딩</strong> 이해.</p>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 3 확장 | 벡터 DB 심화</h2>
+            <figure class="img-slot banner">
+                <img src="images/vectordb.png" alt="벡터DB">
+            </figure>
+            <p>RDBMS vs 벡터DB: 정확 일치 vs 의미 유사. <strong>최근접 탐색</strong>으로 근거 후보를 빠르게 탐색.</p>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 클립 4 확장: 사례/한계/미래/요약 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content split">
+            <div class="col text">
+                <h2>클립 4 확장 | Case Study: Morgan Stanley</h2>
+                <p>리포트 요약 5시간 → RAG 30초 핵심 요약 + 근거 5건 추천.</p>
+            </div>
+            <div class="col image">
+                <figure class="img-slot" style="--img-fit:cover; --img-max-h:70vh;">
+                    <img src="images/morgan.png" alt="Morgan Stanley 사례">
+                </figure>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 4 확장 | RAG의 한계와 미래</h2>
+            <figure class="img-slot banner">
+                <img src="images/future.png" alt="미래 전망">
+            </figure>
+            <div class="step-container">
+                <div class="step"><h4>한계</h4><p>잘못된 근거 검색 시 여전히 위험</p></div>
+                <div class="step"><h4>보완</h4><p>하이브리드 검색·에이전트 RAG</p></div>
+                <div class="step"><h4>전망</h4><p>업무 자동화와 접점 확대</p></div>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>클립 4 확장 | 전체 요약 다이어그램</h2>
+            <figure class="img-slot banner" style="--img-w:90%; --img-ar:21/9;">
+                <img src="images/summary.png" alt="전체 요약 다이어그램">
+            </figure>
+            <p class="tagline">다음 주차: 여러분의 데이터를 Chunking→Embedding하는 실습으로 연결됩니다.</p>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+<!-- 슬라이드 8: RAG 상세 흐름 (split) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content split">
+        <div class="col text">
+            <h2>RAG 상세 흐름</h2>
+            <div class="flow">
+                <div class="node">1) 질문 임베딩</div>
+                <div class="arrow">→</div>
+                <div class="node">2) 최근접 검색</div>
+                <div class="arrow">→</div>
+                <div class="node">3) 프롬프트 구성</div>
+                <div class="arrow">→</div>
+                <div class="node">4) 생성</div>
+            </div>
+        </div>
+        <div class="col image">
+            <figure class="img-slot" style="--img-fit:contain; --img-max-h:78vh; --img-w:100%;">
+                <img src="images/rag.png" alt="RAG 플로우차트">
+            </figure>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<!-- 슬라이드 7: 임베딩(Embedding)과 의미 지도 -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>🧭 임베딩: 의미 지도를 만드는 기술</h2>
+        <figure class="img-slot banner">
+            <img src="images/embedding.png" alt="의미 공간 스캐터">
+        </figure>
+        <p>단어나 문장을 숫자 좌표(벡터)로 바꿔 “의미가 비슷하면 가까이” 놓이도록 합니다.</p>
+        <div class="flow">
+            <div class="node"><strong>“자동차”</strong></div>
+            <div class="arrow">⟶</div>
+            <div class="node">좌표 (…)</div>
+            <div class="arrow">≈</div>
+            <div class="node"><strong>“차량”</strong> (아주 가까움)</div>
+        </div>
+        <p class="tagline">핵심: 텍스트를 의미 공간에 배치해 “비슷함”을 계산 가능하게 만든다.</p>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+<!-- 슬라이드 8: 벡터 검색(Vector Search) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content">
+        <h2>🔎 벡터 검색: 의미로 찾는 검색</h2>
+        <figure class="img-slot banner">
+            <img src="images/vector.png" alt="검색-유사도 개념도">
+        </figure>
+        <p>질문도 임베딩으로 바꾸고, 의미 지도에서 가장 가까운 문서 조각을 찾아옵니다.</p>
+        <div class="flow">
+            <div class="node">질문 임베딩</div>
+            <div class="arrow">⟶</div>
+            <div class="node">벡터 DB에서 가장 가까운 조각 Top-k</div>
+            <div class="arrow">⟶</div>
+            <div class="node">근거 문단 확보</div>
+        </div>
+        <p class="tagline">핵심: “단어가 일치”보다 “의미가 유사”한 정보를 찾는다.</p>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+<!-- 슬라이드 9: RAG 상세 흐름(예시 포함) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content split">
+        <div class="col text">
+            <h2>RAG 상세 흐름</h2>
+            <div class="flow">
+                <div class="node">1) 사용자 질문</div>
+                <div class="arrow">→</div>
+                <div class="node">2) 질문 임베딩</div>
+                <div class="arrow">→</div>
+                <div class="node">3) 벡터 DB 검색</div>
+                <div class="arrow">→</div>
+                <div class="node">4) 프롬프트 구성(근거+질문)</div>
+                <div class="arrow">→</div>
+                <div class="node">5) LLM 답변 생성</div>
+            </div>
+            <div class="prompt-card">
+                <p><strong>예시 질문:</strong> “내 보험으로 도수치료 실비 청구 가능해?”</p>
+                <p><strong>검색 결과:</strong> 약관의 도수치료 보장/제한 문단</p>
+                <p><strong>답변:</strong> “검색된 약관에 따르면 연 10회까지 청구 가능합니다. (근거: 약관 3.2 조항)”</p>
+            </div>
+        </div>
+        <div class="col image">
+            <figure class="img-slot" style="--img-fit:contain; --img-max-h:78vh; --img-w:100%;">
+                <img src="images/rag.png" alt="RAG 플로우차트">
+            </figure>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+<!-- 슬라이드 10: 형성평가 퀴즈 (배경형) -->
+<div class="slide hero" style="--hero-opacity:0.12;">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <figure class="img-slot hero-bg">
+        <img src="../common/images/checklist.png" alt="체크/배지 배경" class="bg-hero" style="--img-fit:cover;">
+        <figcaption></figcaption>
+    </figure>
+    <div class="slide-content">
+        <p class="badge">오늘의 Outcome: 내 질문을 RAG로 재구성</p>
+        <h2>🧩 형성평가 | 오늘 배운 내용 점검</h2>
+        <!-- 배너 이미지는 배경으로 대체 -->
+        <div class="quiz" id="quiz">
+            <div class="q">
+                <h3>Q1. RAG에서 Retrieval의 주된 목적은?</h3>
+                <label><input type="radio" name="q1" value="a"> 모델 파라미터 학습</label><br>
+                <label><input type="radio" name="q1" value="b"> 최신·관련 정보를 찾아 맥락 제공</label><br>
+                <label><input type="radio" name="q1" value="c"> 출력 포맷팅</label>
+            </div>
+            <div class="q">
+                <h3>Q2. 금융 업무에서 RAG가 특히 유리한 이유는?</h3>
+                <label><input type="radio" name="q2" value="a"> 모델이 모든 규정을 기억하기 때문</label><br>
+                <label><input type="radio" name="q2" value="b"> 실시간 규정/시장 데이터 반영 가능</label><br>
+                <label><input type="radio" name="q2" value="c"> 비용이 항상 0원이기 때문</label>
+            </div>
+            <div class="q">
+                <h3>Q3. 하이브리드 검색의 조합으로 옳은 것은?</h3>
+                <label><input type="radio" name="q3" value="a"> 벡터 유사성 + BM25 키워드</label><br>
+                <label><input type="radio" name="q3" value="b"> OCR + 번역</label><br>
+                <label><input type="radio" name="q3" value="c"> 토크나이저 + 스테밍</label>
+            </div>
+            <button onclick="gradeQuiz()">채점하기</button>
+            <div class="quiz-result" id="quizResult"></div>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+<!-- 슬라이드 12: 요약 & 다음 예고 (배경형) -->
+<div class="slide hero" style="--hero-opacity:0.12;">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <figure class="img-slot hero-bg">
+        <img src="../common/images/roadmap.png" alt="로드맵 배경" class="bg-hero">
+        <figcaption></figcaption>
+    </figure>
+    <div class="slide-content">
+        <h2>요약 & 다음 주차에 배울 것</h2>
+        <p>오늘: RAG의 필요성, 핵심 개념, 최신 동향, 금융 사례를 이해했습니다.</p>
+        <p><strong>다음 모듈</strong>: RAG 작동 원리의 3단계(검색→강화→생성) 심층 체험</p>
+        <div class="chips">
+            <span class="chip">#형성평가완료</span><span class="chip">#다음주예고</span>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+        </div>
+        
+<!-- 슬라이드 13: 생각해보기 과제 (split) -->
+<div class="slide">
+    <div class="progress"></div>
+    <div class="logo">서강대학교 K-MOOC</div>
+    <div class="slide-content split">
+        <div class="col text">
+            <h2>생각해보기 | 내 업무에 RAG 적용</h2>
+            <p>매일(혹은 자주) 문서를 찾아보는 반복 업무 1개를 떠올려 보세요. RAG 비서에게 어떤 질문으로 시킬지 한 문장으로 적어봅시다.</p>
+            <div class="prompt-card">
+                <p><strong>프롬프트 템플릿</strong></p>
+                <p>“[문서 저장소/규정 이름]에서 ‘[찾을 주제]’ 관련 최신 조항과 예외 조건을 찾아, 한 문단으로 요약하고 근거 문단을 함께 제시해줘.”</p>
+                <p class="tagline">예: “사내 보안 규정에서 개인정보 외부 전송 관련 최신 조항과 예외를 찾아 요약하고 근거 문단을 함께 제시해줘.”</p>
+            </div>
+        </div>
+        <div class="col image">
+            <figure class="img-slot" style="--img-max-h:70vh; --img-fit:contain;">
+                <img src="images/promptcard.png" alt="프롬프트 카드 목업">
+            </figure>
+        </div>
+    </div>
+    <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+</div>
+
+<script>
+    // 간단한 슬라이드 네비게이션 및 진행바 동적 계산
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function setProgressWidths() {
+        const total = slides.length;
+        document.querySelectorAll('.progress').forEach((bar, idx) => {
+            const pct = Math.round(((idx + 1) / total) * 100);
+            bar.style.width = pct + '%';
+        });
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) {
+            currentSlide++;
+            scrollToSlide(currentSlide);
+        } else if (e.key === 'ArrowLeft' && currentSlide > 0) {
+            currentSlide--;
+            scrollToSlide(currentSlide);
+        }
+    });
+    
+    function scrollToSlide(index) {
+        slides[index].scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function gradeQuiz() {
+        const answers = { q1: 'b', q2: 'b', q3: 'a' };
+        let score = 0, total = Object.keys(answers).length;
+        for (const k in answers) {
+            const picked = document.querySelector(`input[name="${k}"]:checked`);
+            if (picked && picked.value === answers[k]) score++;
+        }
+        const result = document.getElementById('quizResult');
+        const ratio = Math.round((score/total)*100);
+        result.textContent = `점수: ${score}/${total} (${ratio}%)`;
+        if (ratio === 100) {
+            result.innerHTML += ' · 배지 획득 ✅';
+        }
+    }
+
+    window.addEventListener('load', setProgressWidths);
+</script>
+
+    <!-- 스토리 확장: 프로덕션 운영 고려사항 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>프로덕션 고려사항</h2>
+            <ul class="objectives">
+                <li><strong>보안</strong>: 데이터 분류/접근권한/암호화/마스킹</li>
+                <li><strong>품질</strong>: 라벨 없는 <em>implicit</em> 피드백(재질의/복사율) 수집</li>
+                <li><strong>모니터링</strong>: 응답시간, 근거 인용율, 불만 티켓 연동</li>
+                <li><strong>버전관리</strong>: 인덱스/임베딩/프롬프트 릴리스 노트화</li>
+            </ul>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 스토리 확장: 평가 방법론 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>평가 방법론 | 무엇을 측정할까</h2>
+            <ul class="objectives">
+                <li><strong>정확성</strong>: 정답률/근거 일치도/출처 매칭</li>
+                <li><strong>유용성</strong>: 요약 품질, 행동 가능성, 사용자 만족</li>
+                <li><strong>비용·속도</strong>: 요청당 비용(ms당 비용), 캐시 적중률</li>
+            </ul>
+            <p class="tagline">정성·정량 지표의 균형이 중요</p>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 스토리 확장: 윤리·책임·컴플라이언스 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>윤리·책임·컴플라이언스</h2>
+            <ul class="objectives">
+                <li><strong>데이터 최소화</strong>와 목적 제한</li>
+                <li><strong>설명가능성</strong>: 답변 근거 <strong>항상 표시</strong></li>
+                <li><strong>인간 개입</strong>: 고위험 판단에는 <em>Human-in-the-loop</em></li>
+            </ul>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+    <!-- 스토리 확장: 다음 주차 과제 안내 -->
+    <div class="slide">
+        <div class="progress"></div>
+        <div class="logo">서강대학교 K-MOOC</div>
+        <div class="slide-content">
+            <h2>다음 주차 과제 | 나의 문서 준비</h2>
+            <div class="prompt-card">
+                <p>여러분의 업무와 관련된 문서 1~2종(약관/가이드/FAQ)을 선택해 <strong>PDF/텍스트</strong>로 준비하세요. 표/리스트가 많은 문서는 별도로 표시해 주세요. 다음 차시에서 <strong>Chunking→Embedding</strong>을 실습합니다.</p>
+                <p class="tagline">선택 문서명/버전/페이지 수를 메모해 오세요.</p>
+            </div>
+        </div>
+        <div class="footer">김종락 교수 | 서강대학교 수학과</div>
+    </div>
+
+</body>
+</html>
