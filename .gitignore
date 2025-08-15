@@ -64,4 +64,11 @@ temp/
 *.key
 *.pem
 secrets.json
-credentials.jsonclaude-chatgpt-mcp/
+credentials.json
+
+# Lecture preparation materials (private)
+**/docs/
+*/docs/
+
+# Other directories to ignore
+claude-chatgpt-mcp/
